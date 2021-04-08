@@ -1,11 +1,8 @@
 package io.nekohasekai.tmicro.ui;
 
 import com.sun.lwuit.Button;
-import com.sun.lwuit.Container;
 import com.sun.lwuit.Form;
-import com.sun.lwuit.Label;
 import com.sun.lwuit.layouts.BorderLayout;
-import com.sun.lwuit.layouts.BoxLayout;
 
 public class LaunchActivity extends Form {
 

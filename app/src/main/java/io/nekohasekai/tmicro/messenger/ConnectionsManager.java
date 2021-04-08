@@ -103,7 +103,8 @@ public class ConnectionsManager extends WebSocketListener {
         onMessage(socket, Strings.fromByteArray(message));
     }
 
-    public void onMessage(WebSocket socket, String message) { System.out.println("Received: " + message);
+    public void onMessage(WebSocket socket, String message) {
+        System.out.println("Received: " + message);
     }
 
     public void onClose(WebSocket socket, int code, String reason) {
