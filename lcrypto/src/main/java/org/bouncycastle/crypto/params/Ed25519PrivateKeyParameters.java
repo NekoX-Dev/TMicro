@@ -3,7 +3,7 @@ package org.bouncycastle.crypto.params;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.SecureRandom;
+import j2me.security.SecureRandom;
 
 import org.bouncycastle.math.ec.rfc8032.Ed25519;
 import org.bouncycastle.util.Arrays;

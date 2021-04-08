@@ -1,6 +1,6 @@
 package org.bouncycastle.crypto.params;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.math.ec.ECAlgorithms;

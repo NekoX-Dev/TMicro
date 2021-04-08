@@ -1,6 +1,6 @@
 package org.bouncycastle.crypto.engines;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 import java.util.Vector;
 
 import org.bouncycastle.crypto.AsymmetricBlockCipher;

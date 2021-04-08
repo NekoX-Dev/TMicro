@@ -2,7 +2,7 @@ package org.bouncycastle.crypto.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.SecureRandom;
+import j2me.security.SecureRandom;
 
 import org.bouncycastle.crypto.CryptoServicesRegistrar;
 import org.bouncycastle.util.Arrays;

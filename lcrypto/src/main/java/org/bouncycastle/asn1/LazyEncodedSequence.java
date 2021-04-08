@@ -2,7 +2,7 @@ package org.bouncycastle.asn1;
 
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.Iterator;
+import j2me.util.Iterator;
 
 /**
  * Note: this class is for processing DER/DL encoded sequences only.

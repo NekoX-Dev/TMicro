@@ -1,6 +1,6 @@
 package org.bouncycastle.crypto.prng;
 
-import java.security.SecureRandom;
+import j2me.security.SecureRandom;
 
 public class X931SecureRandom
     extends SecureRandom

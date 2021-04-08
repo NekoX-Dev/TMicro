@@ -1,7 +1,7 @@
 package org.bouncycastle.math;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
+import j2me.math.BigInteger;
+import j2me.security.SecureRandom;
 
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.util.Arrays;

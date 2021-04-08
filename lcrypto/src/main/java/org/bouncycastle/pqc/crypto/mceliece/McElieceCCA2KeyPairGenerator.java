@@ -1,7 +1,7 @@
 package org.bouncycastle.pqc.crypto.mceliece;
 
 
-import java.security.SecureRandom;
+import j2me.security.SecureRandom;
 
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPairGenerator;

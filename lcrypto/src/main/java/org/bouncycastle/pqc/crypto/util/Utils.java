@@ -1,7 +1,7 @@
 package org.bouncycastle.pqc.crypto.util;
 
-import java.util.HashMap;
-import java.util.Map;
+import j2me.util.HashMap;
+import j2me.util.Map;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;

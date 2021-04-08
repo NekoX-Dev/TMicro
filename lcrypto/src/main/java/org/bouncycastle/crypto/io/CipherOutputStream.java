@@ -1,6 +1,6 @@
 package org.bouncycastle.crypto.io;
 
-import java.io.FilterOutputStream;
+import j2me.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 

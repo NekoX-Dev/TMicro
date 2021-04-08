@@ -1,7 +1,7 @@
 package org.bouncycastle.asn1.x509;
 
 import java.io.IOException;
-import java.util.StringTokenizer;
+import j2me.util.StringTokenizer;
 
 import org.bouncycastle.asn1.ASN1Choice;
 import org.bouncycastle.asn1.ASN1Encodable;

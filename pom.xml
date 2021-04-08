@@ -16,6 +16,8 @@
         <module>json</module>
         <module>javolution</module>
         <module>websocket</module>
+        <module>gzip</module>
+        <module>lwuit</module>
     </modules>
 
 </project>

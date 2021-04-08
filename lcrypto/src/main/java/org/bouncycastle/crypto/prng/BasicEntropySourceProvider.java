@@ -1,6 +1,6 @@
 package org.bouncycastle.crypto.prng;
 
-import java.security.SecureRandom;
+import j2me.security.SecureRandom;
 
 /**
  * An EntropySourceProvider where entropy generation is based on a SecureRandom output using SecureRandom.generateSeed().

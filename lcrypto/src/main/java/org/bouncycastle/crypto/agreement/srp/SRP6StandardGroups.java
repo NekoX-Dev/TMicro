@@ -1,6 +1,6 @@
 package org.bouncycastle.crypto.agreement.srp;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 import org.bouncycastle.crypto.params.SRP6GroupParameters;
 import org.bouncycastle.util.encoders.Hex;

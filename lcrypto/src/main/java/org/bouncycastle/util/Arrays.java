@@ -1,7 +1,6 @@
 package org.bouncycastle.util;
 
-import java.math.BigInteger;
-import java.util.Iterator;
+import j2me.math.BigInteger;
 
 /**
  * General array utilities.
@@ -1186,7 +1185,7 @@ public final class Arrays
      * Iterator backed by a specific array.
      */
     public static class Iterator
-        implements java.util.Iterator
+        implements j2me.util.Iterator
     {
         private final Object[] dataArray;
 

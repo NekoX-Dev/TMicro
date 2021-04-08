@@ -1,12 +1,10 @@
 package org.bouncycastle.util;
 
-import java.math.BigInteger;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
+import j2me.math.BigInteger;
+import j2me.util.Collections;
+import j2me.util.HashSet;
+import j2me.util.Set;
+import j2me.util.StringTokenizer;
 
 /**
  * Utility method for accessing system properties.

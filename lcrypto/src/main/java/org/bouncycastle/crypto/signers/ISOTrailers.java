@@ -1,8 +1,8 @@
 package org.bouncycastle.crypto.signers;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import j2me.util.Collections;
+import j2me.util.HashMap;
+import j2me.util.Map;
 
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.util.Integers;

@@ -1,6 +1,6 @@
 package org.bouncycastle.crypto;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 /**
  * An "extended" interface for classes implementing DSA-style algorithms, that provides access to

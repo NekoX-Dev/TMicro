@@ -2,7 +2,7 @@ package org.bouncycastle.asn1;
 
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.Iterator;
+import j2me.util.Iterator;
 import java.util.NoSuchElementException;
 
 import org.bouncycastle.util.Arrays;

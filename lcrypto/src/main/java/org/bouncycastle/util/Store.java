@@ -1,6 +1,6 @@
 package org.bouncycastle.util;
 
-import java.util.Collection;
+import j2me.util.Collection;
 
 public interface Store
 {

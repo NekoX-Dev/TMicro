@@ -1,6 +1,6 @@
 package org.bouncycastle.crypto.prng.drbg;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.crypto.Digest;

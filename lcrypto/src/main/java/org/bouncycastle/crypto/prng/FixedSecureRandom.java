@@ -2,7 +2,7 @@ package org.bouncycastle.crypto.prng;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.SecureRandom;
+import j2me.security.SecureRandom;
 
 /**
  * A secure random that returns pre-seeded data to calls of nextBytes() or generateSeed().

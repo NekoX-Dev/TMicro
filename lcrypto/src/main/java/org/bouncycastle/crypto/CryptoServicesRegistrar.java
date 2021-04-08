@@ -1,10 +1,9 @@
 package org.bouncycastle.crypto;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import j2me.math.BigInteger;
+import j2me.security.SecureRandom;
+import j2me.util.HashMap;
+import j2me.util.Map;
 
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.params.DHParameters;

@@ -1,10 +1,10 @@
 package org.bouncycastle.crypto.util;
 
-import java.util.Collections;
+import j2me.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import j2me.util.HashMap;
+import j2me.util.Iterator;
+import j2me.util.Map;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;

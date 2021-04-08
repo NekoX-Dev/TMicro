@@ -1,6 +1,6 @@
 package org.bouncycastle.asn1.isismtt.x509;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;

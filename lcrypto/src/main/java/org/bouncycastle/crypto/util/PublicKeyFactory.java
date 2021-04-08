@@ -2,9 +2,9 @@ package org.bouncycastle.crypto.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
+import j2me.math.BigInteger;
+import j2me.util.HashMap;
+import j2me.util.Map;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;

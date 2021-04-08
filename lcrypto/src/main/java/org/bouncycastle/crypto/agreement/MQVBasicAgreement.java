@@ -1,7 +1,7 @@
 package org.bouncycastle.crypto.agreement;
 
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 import org.bouncycastle.crypto.BasicAgreement;
 import org.bouncycastle.crypto.CipherParameters;

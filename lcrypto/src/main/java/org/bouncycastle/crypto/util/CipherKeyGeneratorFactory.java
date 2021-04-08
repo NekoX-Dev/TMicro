@@ -11,7 +11,7 @@ import org.bouncycastle.crypto.KeyGenerationParameters;
 import org.bouncycastle.crypto.generators.DESKeyGenerator;
 import org.bouncycastle.crypto.generators.DESedeKeyGenerator;
 
-import java.security.SecureRandom;
+import j2me.security.SecureRandom;
 
 /**
  * Factory methods for generating secret key generators for symmetric ciphers.

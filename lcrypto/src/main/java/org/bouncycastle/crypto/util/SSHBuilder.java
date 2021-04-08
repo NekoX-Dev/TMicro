@@ -2,7 +2,7 @@ package org.bouncycastle.crypto.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 import org.bouncycastle.util.Strings;
 

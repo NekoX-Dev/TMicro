@@ -19,12 +19,12 @@
     <dependencies>
         <dependency>
             <groupId>io.nekohasekai</groupId>
-            <artifactId>javolution</artifactId>
+            <artifactId>lcrypto</artifactId>
             <version>${version}</version>
         </dependency>
         <dependency>
             <groupId>io.nekohasekai</groupId>
-            <artifactId>json</artifactId>
+            <artifactId>gzip</artifactId>
             <version>${version}</version>
         </dependency>
         <dependency>
@@ -45,7 +45,7 @@
                     <compilerArgs>
                         <arg>-verbose</arg>
                         <arg>-bootclasspath</arg>
-                        <arg>${wtk.home}</arg>
+                        <arg>${wtk.home}/lib</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>

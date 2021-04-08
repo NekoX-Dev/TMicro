@@ -1,6 +1,6 @@
 package org.bouncycastle.crypto.params;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 public class GOST3410PrivateKeyParameters
         extends GOST3410KeyParameters

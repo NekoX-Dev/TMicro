@@ -1,7 +1,7 @@
 package org.bouncycastle.crypto.generators;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
+import j2me.math.BigInteger;
+import j2me.security.SecureRandom;
 
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPairGenerator;

@@ -1,17 +1,20 @@
 package io.nekohasekai.tmicro.messenger;
 
 import io.nekohasekai.tmicro.TMicro;
-import io.nekohasekai.tmicro.utils.IoUtil;
+import io.nekohasekai.tmicro.utils.EncUtil;
 import io.nekohasekai.tmicro.utils.RecordUtil;
 import io.nekohasekai.tmicro.utils.rms.RecordDatabase;
-import org.json.me.JSONException;
-import org.json.me.JSONObject;
+import io.nekohasekai.wsm.WebSocket;
+import io.nekohasekai.wsm.WebSocketClient;
+import io.nekohasekai.wsm.WebSocketListener;
+import j2me.util.HashMap;
+import org.bouncycastle.util.Strings;
 
-import javax.microedition.io.Connector;
-import javax.microedition.io.HttpConnection;
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
-public class ConnectionsManager {
+public class ConnectionsManager extends WebSocketListener {
 
     private static ConnectionsManager INSTANCE;
 
@@ -69,34 +72,51 @@ public class ConnectionsManager {
         output.writeLong(userId);
     }
 
-    public static JSONObject sendRequest(String path, JSONObject request) throws IOException {
+    public WebSocket socket;
+    public byte[] key;
 
-        String json = request.toString();
+    public void connect() throws IOException {
+        key = EncUtil.generateChaCha20Poly1305Key();
 
-        HttpConnection connection = (HttpConnection) Connector.open(TMicro.SERVER + "/" + path);
-        connection.setRequestMethod("POST");
-        connection.setRequestProperty("Connection", "Keep-Alive");
-        connection.setRequestProperty("Content-Type", "application/json");
-        connection.setRequestProperty("UserAgent", "TMicro/" + TMicro.VERSION + " (J2ME/MIDP; TMicro; U; en)");
+        HashMap headers = new HashMap();
+        headers.put("Authorization", "Basic " + EncUtil.publicEncode(key));
 
-        OutputStream out = connection.openOutputStream();
-        IoUtil.writeUTF8(out, json);
-        out.close();
+        socket = WebSocketClient.open(TMicro.SERVER, "/", headers, this);
+    }
 
-        int response = connection.getResponseCode();
-        InputStream in = connection.openInputStream();
-        String content = IoUtil.readUTF8(in);
-
-        if (response != 200) {
-            throw new IOException("HTTP " + response + ": " + content);
-        }
-
+    public void onPing(WebSocket socket, byte[] payload) {
         try {
-            return new JSONObject(content);
-        } catch (JSONException e) {
-            throw new IOException("Invalid json format: " + e.getMessage());
+            socket.pong(payload);
+            System.out.println("Pong sent");
+        } catch (IOException e) {
+            System.err.println("Pong failed");
+            e.printStackTrace();
         }
+    }
 
+    public void onPong(WebSocket socket, byte[] payload) {
+        System.out.println("Pong received");
+    }
+
+    public void onMessage(WebSocket socket, byte[] message) {
+        EncUtil.processChaCha20Poly1305(key, true, message);
+        onMessage(socket, Strings.fromByteArray(message));
+    }
+
+    public void onMessage(WebSocket socket, String message) { System.out.println("Received: " + message);
+    }
+
+    public void onClose(WebSocket socket, int code, String reason) {
+        System.out.println("Connection closed, code=" + code + ", reason=" + reason);
+    }
+
+    public void onFailure(WebSocket socket, Throwable t) {
+        System.out.println("Connection failed: ");
+        t.printStackTrace();
+    }
+
+    public void sendRequestRaw(String content) throws IOException {
+        socket.send(EncUtil.processChaCha20Poly1305(key, true, Strings.toByteArray(content)));
     }
 
 }

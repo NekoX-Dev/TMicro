@@ -1,6 +1,6 @@
 package org.bouncycastle.asn1.ua;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 import java.util.Random;
 
 import org.bouncycastle.math.ec.ECConstants;

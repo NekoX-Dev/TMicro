@@ -1,7 +1,7 @@
 package org.bouncycastle.asn1.cmc;
 
-import java.util.HashMap;
-import java.util.Map;
+import j2me.util.HashMap;
+import j2me.util.Map;
 
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;

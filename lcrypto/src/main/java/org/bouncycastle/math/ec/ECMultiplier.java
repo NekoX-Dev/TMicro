@@ -1,6 +1,6 @@
 package org.bouncycastle.math.ec;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 /**
  * Interface for classes encapsulating a point multiplication algorithm

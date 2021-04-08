@@ -1,14 +1,13 @@
 package org.bouncycastle.crypto.util;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.util.HashSet;
-import java.util.Set;
+import j2me.math.BigInteger;
+import j2me.util.HashSet;
+import j2me.util.Set;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;

@@ -1,7 +1,7 @@
 package org.bouncycastle.crypto.signers;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
+import j2me.math.BigInteger;
+import j2me.security.SecureRandom;
 
 import org.bouncycastle.util.BigIntegers;
 

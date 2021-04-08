@@ -1,7 +1,7 @@
 package org.bouncycastle.pqc.math.linearalgebra;
 
 
-import java.security.SecureRandom;
+import j2me.security.SecureRandom;
 import java.util.Random;
 import java.util.Vector;
 

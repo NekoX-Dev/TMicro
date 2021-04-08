@@ -1,6 +1,6 @@
 package org.bouncycastle.crypto.ec;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;

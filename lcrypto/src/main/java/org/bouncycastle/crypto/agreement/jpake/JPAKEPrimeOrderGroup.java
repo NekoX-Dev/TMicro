@@ -1,6 +1,6 @@
 package org.bouncycastle.crypto.agreement.jpake;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 /**
  * A pre-computed prime order group for use during a J-PAKE exchange.

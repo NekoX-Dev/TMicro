@@ -1,6 +1,6 @@
 package org.bouncycastle.crypto.commitments;
 
-import java.security.SecureRandom;
+import j2me.security.SecureRandom;
 
 import org.bouncycastle.crypto.Commitment;
 import org.bouncycastle.crypto.Committer;

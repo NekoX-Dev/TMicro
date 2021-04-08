@@ -1,6 +1,6 @@
 package org.bouncycastle.math.raw;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 import org.bouncycastle.util.Pack;
 

@@ -2,7 +2,7 @@ package org.bouncycastle.math.ec;
 
 import org.bouncycastle.util.Arrays;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 class LongArray
 {

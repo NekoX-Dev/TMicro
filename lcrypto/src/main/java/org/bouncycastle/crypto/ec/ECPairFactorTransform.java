@@ -1,6 +1,6 @@
 package org.bouncycastle.crypto.ec;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 public interface ECPairFactorTransform
     extends ECPairTransform

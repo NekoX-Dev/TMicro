@@ -2,9 +2,9 @@ package org.bouncycastle.asn1;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
+import j2me.math.BigInteger;
+import j2me.util.HashMap;
+import j2me.util.Map;
 
 import org.bouncycastle.util.Arrays;
 

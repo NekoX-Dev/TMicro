@@ -1,6 +1,6 @@
 package org.bouncycastle.math.ec.endo;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPointMap;

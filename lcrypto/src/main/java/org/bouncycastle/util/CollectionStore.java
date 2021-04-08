@@ -1,9 +1,9 @@
 package org.bouncycastle.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import j2me.util.ArrayList;
+import j2me.util.Collection;
+import j2me.util.Iterator;
+import j2me.util.List;
 
 /**
  * A simple collection backed store.

@@ -1,6 +1,6 @@
 package org.bouncycastle.crypto.engines;
 
-import java.util.ArrayList;
+import j2me.util.ArrayList;
 
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;

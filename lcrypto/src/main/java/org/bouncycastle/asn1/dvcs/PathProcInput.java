@@ -1,6 +1,6 @@
 package org.bouncycastle.asn1.dvcs;
 
-import java.util.Arrays;
+import j2me.util.Arrays;
 
 import org.bouncycastle.asn1.ASN1Boolean;
 import org.bouncycastle.asn1.ASN1EncodableVector;

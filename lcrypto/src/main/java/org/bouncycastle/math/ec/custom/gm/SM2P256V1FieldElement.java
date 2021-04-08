@@ -1,6 +1,6 @@
 package org.bouncycastle.math.ec.custom.gm;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.raw.Nat256;

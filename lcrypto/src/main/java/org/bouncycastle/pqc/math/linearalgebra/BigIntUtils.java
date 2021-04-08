@@ -1,6 +1,6 @@
 package org.bouncycastle.pqc.math.linearalgebra;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 /**
  * FIXME: is this really necessary?!

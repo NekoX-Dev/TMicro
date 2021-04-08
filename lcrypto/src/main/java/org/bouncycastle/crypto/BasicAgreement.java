@@ -1,6 +1,6 @@
 package org.bouncycastle.crypto;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 /**
  * The basic interface that basic Diffie-Hellman implementations

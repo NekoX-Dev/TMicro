@@ -1,6 +1,6 @@
 package org.bouncycastle.asn1.ocsp;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 import org.bouncycastle.asn1.ASN1Enumerated;
 import org.bouncycastle.asn1.ASN1Object;

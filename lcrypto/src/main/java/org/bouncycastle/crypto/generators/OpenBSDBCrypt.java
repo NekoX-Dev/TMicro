@@ -1,8 +1,8 @@
 package org.bouncycastle.crypto.generators;
 
 import java.io.ByteArrayOutputStream;
-import java.util.HashSet;
-import java.util.Set;
+import j2me.util.HashSet;
+import j2me.util.Set;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.util.Arrays;

@@ -1,6 +1,6 @@
 package org.bouncycastle.util;
 
-import java.util.Iterator;
+import j2me.util.Iterator;
 
 /**
  * Utility class to allow use of Iterable feature in JDK 1.5+

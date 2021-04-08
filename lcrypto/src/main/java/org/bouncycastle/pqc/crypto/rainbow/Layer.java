@@ -1,6 +1,6 @@
 package org.bouncycastle.pqc.crypto.rainbow;
 
-import java.security.SecureRandom;
+import j2me.security.SecureRandom;
 
 import org.bouncycastle.pqc.crypto.rainbow.util.GF2Field;
 import org.bouncycastle.pqc.crypto.rainbow.util.RainbowUtil;

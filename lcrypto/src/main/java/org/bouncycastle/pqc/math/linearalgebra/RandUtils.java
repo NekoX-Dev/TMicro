@@ -1,6 +1,6 @@
 package org.bouncycastle.pqc.math.linearalgebra;
 
-import java.security.SecureRandom;
+import j2me.security.SecureRandom;
 
 public class RandUtils
 {

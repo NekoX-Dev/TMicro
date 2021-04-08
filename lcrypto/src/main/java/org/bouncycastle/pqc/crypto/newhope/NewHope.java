@@ -1,6 +1,6 @@
 package org.bouncycastle.pqc.crypto.newhope;
 
-import java.security.SecureRandom;
+import j2me.security.SecureRandom;
 
 import org.bouncycastle.crypto.digests.SHA3Digest;
 

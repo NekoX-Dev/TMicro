@@ -1,11 +1,11 @@
 package org.bouncycastle.math.ec;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 /**
  * Class representing a simple version of a big decimal. A
  * <code>SimpleBigDecimal</code> is basically a
- * {@link java.math.BigInteger BigInteger} with a few digits on the right of
+ * {@link BigInteger BigInteger} with a few digits on the right of
  * the decimal point. The number of (binary) digits on the right of the decimal
  * point is called the <code>scale</code> of the <code>SimpleBigDecimal</code>.
  * Unlike in {@link java.math.BigDecimal BigDecimal}, the scale is not adjusted

@@ -1,6 +1,6 @@
 package org.bouncycastle.crypto.agreement.jpake;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 /**
  * The payload sent/received during the optional third round of a J-PAKE exchange,

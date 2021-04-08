@@ -1,6 +1,6 @@
 package org.bouncycastle.pqc.crypto.gmss;
 
-import java.security.SecureRandom;
+import j2me.security.SecureRandom;
 import java.util.Vector;
 
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;

@@ -1,6 +1,6 @@
 package org.bouncycastle.math.ec.rfc7748;
 
-import java.security.SecureRandom;
+import j2me.security.SecureRandom;
 
 import org.bouncycastle.math.ec.rfc8032.Ed448;
 import org.bouncycastle.util.Arrays;

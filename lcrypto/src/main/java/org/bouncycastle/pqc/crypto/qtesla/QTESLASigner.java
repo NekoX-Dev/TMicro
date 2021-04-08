@@ -1,6 +1,6 @@
 package org.bouncycastle.pqc.crypto.qtesla;
 
-import java.security.SecureRandom;
+import j2me.security.SecureRandom;
 
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.CryptoServicesRegistrar;

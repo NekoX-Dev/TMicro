@@ -1,6 +1,6 @@
 package org.bouncycastle.pqc.math.linearalgebra;
 
-import java.security.SecureRandom;
+import j2me.security.SecureRandom;
 
 import org.bouncycastle.util.Arrays;
 
@@ -115,7 +115,7 @@ public class GF2Matrix
      */
     public GF2Matrix(int n, char typeOfMatrix)
     {
-        this(n, typeOfMatrix, new java.security.SecureRandom());
+        this(n, typeOfMatrix, new SecureRandom());
     }
 
     /**

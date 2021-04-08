@@ -82,11 +82,17 @@ public class IoUtil {
         return builder.toString();
     }
 
-    public static byte[] readResBytes(String path) throws IOException {
+    public static InputStream getResIn(String path) throws IOException {
+        if (!path.startsWith("/")) path = "/" + path;
         InputStream in = TMicro.class.getResourceAsStream(path);
         if (in == null) {
             throw new IOException(path + " not found");
         }
+        return in;
+    }
+
+    public static byte[] readResBytes(String path) throws IOException {
+        InputStream in = getResIn(path);
         try {
             return readByteArray(in);
         } finally {
@@ -95,10 +101,7 @@ public class IoUtil {
     }
 
     public static String readResUTF8(String path) throws IOException {
-        InputStream in = TMicro.class.getResourceAsStream(path);
-        if (in == null) {
-            throw new IOException(path + " not found");
-        }
+        InputStream in = getResIn(path);
         try {
             return readUTF8(in);
         } finally {

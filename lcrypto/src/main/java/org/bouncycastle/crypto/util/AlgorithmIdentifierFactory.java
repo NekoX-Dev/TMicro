@@ -13,7 +13,7 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.RC2CBCParameter;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
-import java.security.SecureRandom;
+import j2me.security.SecureRandom;
 
 /**
  * Factory methods for common AlgorithmIdentifiers.

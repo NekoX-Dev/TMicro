@@ -1,6 +1,6 @@
 package org.bouncycastle.crypto.generators;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.DerivationParameters;

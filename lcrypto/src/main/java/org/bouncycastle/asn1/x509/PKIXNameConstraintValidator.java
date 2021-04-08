@@ -1,13 +1,13 @@
 package org.bouncycastle.asn1.x509;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import j2me.util.Collection;
+import j2me.util.Collections;
+import j2me.util.HashMap;
+import j2me.util.HashSet;
+import j2me.util.Iterator;
+import j2me.util.Map;
+import j2me.util.Set;
 
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;

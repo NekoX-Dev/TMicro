@@ -1,7 +1,7 @@
 package org.bouncycastle.pqc.crypto.newhope;
 
 import java.io.IOException;
-import java.security.SecureRandom;
+import j2me.security.SecureRandom;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -45,7 +45,7 @@ public class NHOtherInfoGenerator
         private AsymmetricCipherKeyPair aKp;
         private NHAgreement agreement = new NHAgreement();
 
-        public PartyU(AlgorithmIdentifier algorithmID, byte[] partyUInfo, byte[] partyVInfo, java.security.SecureRandom random)
+        public PartyU(AlgorithmIdentifier algorithmID, byte[] partyUInfo, byte[] partyVInfo, SecureRandom random)
         {
             super(algorithmID, partyUInfo, partyVInfo, random);
 

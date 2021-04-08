@@ -1,7 +1,7 @@
 package org.bouncycastle.crypto.signers;
 
 import java.io.IOException;
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 /**
  * An interface for different encoding formats for DSA signatures.

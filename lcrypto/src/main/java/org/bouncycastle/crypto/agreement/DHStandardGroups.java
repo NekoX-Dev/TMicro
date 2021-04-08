@@ -1,6 +1,6 @@
 package org.bouncycastle.crypto.agreement;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 import org.bouncycastle.crypto.params.DHParameters;
 import org.bouncycastle.util.encoders.Hex;

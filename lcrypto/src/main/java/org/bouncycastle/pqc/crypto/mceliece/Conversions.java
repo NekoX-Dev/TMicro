@@ -1,6 +1,6 @@
 package org.bouncycastle.pqc.crypto.mceliece;
 
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 import org.bouncycastle.pqc.math.linearalgebra.BigIntUtils;
 import org.bouncycastle.pqc.math.linearalgebra.GF2Vector;

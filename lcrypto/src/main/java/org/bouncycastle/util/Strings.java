@@ -3,10 +3,10 @@ package org.bouncycastle.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
+import j2me.util.ArrayList;
+import j2me.util.List;
 import java.util.Vector;
-import java.util.Iterator;
+import j2me.util.Iterator;
 
 public final class Strings
 {

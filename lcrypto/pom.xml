@@ -14,7 +14,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <wtk.home>${parent.basedir}/libs/wtk</wtk.home>
+        <wtk.home>${project.basedir}/../libs/wtk</wtk.home>
     </properties>
 
     <dependencies>
@@ -36,7 +36,7 @@
                     <compilerArgs>
                         <arg>-verbose</arg>
                         <arg>-bootclasspath</arg>
-                        <arg>${wtk.home}</arg>
+                        <arg>${wtk.home}/lib</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>

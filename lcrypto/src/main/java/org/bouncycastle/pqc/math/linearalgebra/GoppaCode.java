@@ -1,6 +1,6 @@
 package org.bouncycastle.pqc.math.linearalgebra;
 
-import java.security.SecureRandom;
+import j2me.security.SecureRandom;
 
 /**
  * This class describes decoding operations of an irreducible binary Goppa code.

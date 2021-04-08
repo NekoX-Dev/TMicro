@@ -2,7 +2,7 @@ package org.bouncycastle.crypto.parsers;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
+import j2me.math.BigInteger;
 
 import org.bouncycastle.crypto.KeyParser;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;

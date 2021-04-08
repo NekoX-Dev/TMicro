@@ -1,6 +1,6 @@
 package org.bouncycastle.math.ec.rfc8032;
 
-import java.security.SecureRandom;
+import j2me.security.SecureRandom;
 
 import org.bouncycastle.crypto.Xof;
 import org.bouncycastle.crypto.digests.SHAKEDigest;
