@@ -1,8 +1,10 @@
 package io.nekohasekai.tmicro.utils.rms;
 
+import io.nekohasekai.tmicro.tmnet.SerializedData;
+
 import javax.microedition.rms.RecordStore;
 import javax.microedition.rms.RecordStoreException;
-import java.io.*;
+import java.io.IOException;
 
 public class RecordDatabase {
 
@@ -14,30 +16,38 @@ public class RecordDatabase {
 
     public byte[] getBytes(int index) throws IOException {
         try {
+            if (index >= rs.getNumRecords()) throw new IOException("Not found");
             return rs.getRecord(index);
         } catch (RecordStoreException e) {
+            e.printStackTrace();
             throw new IOException(e.getMessage());
         }
     }
 
     public void setBytes(int index, byte[] bytes) throws IOException {
         try {
-            rs.setRecord(index, bytes, 0, bytes.length);
+            if (index >= rs.getNumRecords()) {
+                rs.addRecord(bytes, 0, bytes.length);
+            } else {
+                rs.setRecord(index, bytes, 0, bytes.length);
+            }
         } catch (RecordStoreException e) {
+            e.printStackTrace();
             throw new IOException(e.getMessage());
         }
     }
 
-    public DataInputStream getIn(int index) throws IOException {
-        return new DataInputStream(new ByteArrayInputStream(getBytes(index)));
+    public SerializedData getIn(int index) throws IOException {
+        return new SerializedData(getBytes(index));
     }
 
-    public DataOutputStream getOut(final int index) {
-        return new DataOutputStream(new ByteArrayOutputStream() {
+    public SerializedData getOut(final int index) {
+        return new SerializedData() {
             public void flush() throws IOException {
+                super.flush();
                 setBytes(index, toByteArray());
             }
-        });
+        };
     }
 
 }

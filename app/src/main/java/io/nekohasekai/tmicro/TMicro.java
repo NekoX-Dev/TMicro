@@ -1,24 +1,20 @@
 package io.nekohasekai.tmicro;
 
 import com.sun.lwuit.Display;
-import io.nekohasekai.tmicro.messenger.ConnectionsManager;
 import io.nekohasekai.tmicro.ui.LaunchActivity;
 import io.nekohasekai.tmicro.utils.ResUtil;
-import j2me.security.SecureRandom;
 import j2me.util.HashMap;
-import org.bouncycastle.util.Strings;
-import org.bouncycastle.util.encoders.Base64;
 
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
-import java.io.IOException;
 
 public class TMicro extends MIDlet {
 
-    public static String VERSION;
-    public static boolean DEBUG;
-    public static String SERVER;
+    public static final boolean DEBUG = true;
+    public static final String VERSION = "1.0-SNAPSHOT";
+    public static final int VERSION_INT = 1;
 
+    public static String SERVER;
     public static TMicro application;
 
     protected void startApp() throws MIDletStateChangeException {
@@ -26,8 +22,6 @@ public class TMicro extends MIDlet {
             Display.init(this);
 
             HashMap properties = ResUtil.readPropertiesRes("/config.properties");
-            VERSION = (String) properties.get("VERSION");
-            DEBUG = "true".equalsIgnoreCase((String) properties.get("DEBUG"));
             SERVER = (String) properties.get("SERVER");
             application = this;
             onCreate();
@@ -38,9 +32,7 @@ public class TMicro extends MIDlet {
     }
 
     private void onCreate() {
-        if (ConnectionsManager.getInstance().accountStatus != ConnectionsManager.STATUS_OK) {
-            new LaunchActivity().show();
-        }
+        new LaunchActivity().show();
     }
 
     protected void pauseApp() {

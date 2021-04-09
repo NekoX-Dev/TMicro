@@ -1,7 +1,10 @@
 package io.nekohasekai.tmicro.ui;
 
 import com.sun.lwuit.*;
+import com.sun.lwuit.events.ActionEvent;
+import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.layouts.BoxLayout;
+import io.nekohasekai.tmicro.messenger.ConnectionsManager;
 
 import java.io.IOException;
 
@@ -51,6 +54,15 @@ public class LaunchActivity extends Form {
             getSelectedStyle().setFgColor(0xffffff);
             getSelectedStyle().setBgColor(0x448aff);
             getSelectedStyle().setBorder(null);
+            addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent evt) {
+                    try {
+                        ConnectionsManager.getInstance().connect();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         }};
 
         buttonLayout.addComponent(loginButton);

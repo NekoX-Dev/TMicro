@@ -2,6 +2,9 @@ package io.nekohasekai.tmicro.messenger;
 
 import com.googlecode.compress_j2me.gzip.Gzip;
 import io.nekohasekai.tmicro.TMicro;
+import io.nekohasekai.tmicro.tmnet.SerializedData;
+import io.nekohasekai.tmicro.tmnet.TMApi;
+import io.nekohasekai.tmicro.tmnet.TMClassStore;
 import io.nekohasekai.tmicro.utils.EncUtil;
 import io.nekohasekai.tmicro.utils.IoUtil;
 import io.nekohasekai.tmicro.utils.RecordUtil;
@@ -9,13 +12,15 @@ import io.nekohasekai.tmicro.utils.rms.RecordDatabase;
 import io.nekohasekai.wsm.WebSocket;
 import io.nekohasekai.wsm.WebSocketClient;
 import io.nekohasekai.wsm.WebSocketListener;
+import j2me.lang.IllegalStateException;
 import j2me.util.HashMap;
 import org.bouncycastle.crypto.CryptoException;
-import org.bouncycastle.util.Strings;
+import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 
 import javax.microedition.rms.RecordStore;
 import javax.microedition.rms.RecordStoreException;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 public class ConnectionsManager extends WebSocketListener {
 
@@ -33,56 +38,62 @@ public class ConnectionsManager extends WebSocketListener {
         return INSTANCE;
     }
 
-    public static int STATUS_WAIT_PHONE = 0;
-    public static int STATUS_WAIT_CODE = 1;
-    public static int STATUS_WAIT_PSWD = 2;
-    public static int STATUS_OK = 3;
-
     public RecordDatabase db;
 
     public int accountNum;
+    public byte[] accountSession;
     public int accountStatus;
-    public String accountToken = "";
-    public long userId;
+
+    private ECPrivateKeyParameters accountPk;
 
     public ConnectionsManager(int accountNum) throws IOException {
         this.accountNum = accountNum;
         if (TMicro.DEBUG) {
             try {
-                RecordStore.deleteRecordStore("tgnet" + accountNum);
+                RecordStore.deleteRecordStore("tmnet" + accountNum);
             } catch (RecordStoreException ignored) {
             }
         }
-        db = RecordUtil.openPrivate("tgnet" + accountNum);
+        db = RecordUtil.openPrivate("tmnet" + accountNum);
 
         loadConfig();
     }
 
     private void loadConfig() throws IOException {
-        DataInputStream input;
+        SerializedData input;
+        int version;
         try {
-            input = db.getIn(0);
+            input = db.getIn(1);
+            version = input.readInt32(false);
+            if (version == 0) {
+                throw new IOException();
+            }
         } catch (IOException ignored) {
+            accountSession = EncUtil.generateSM2PrivateKey().getD().toByteArray();
+            writeConfig();
             return;
         }
 
-        int version = input.readInt();
-        accountStatus = input.readInt();
-        accountToken = input.readUTF();
-        userId = input.readLong();
-        input.close();
+        if (version > 1) {
+            throw new IllegalStateException("Unknown database version " + version);
+        }
+
+        accountSession = input.readByteArray(true);
+        accountStatus = input.readInt32(true);
+        input.cleanup();
     }
 
     private void writeConfig() throws IOException {
-        DataOutputStream output = db.getOut(0);
-        output.writeInt(0);
-        output.writeInt(accountStatus);
-        output.writeUTF(accountToken);
-        output.writeLong(userId);
+        SerializedData output = db.getOut(1);
+        output.writeInt32(1);
+        output.writeByteArray(accountSession);
+        output.writeInt32(accountStatus);
+        output.flush();
     }
 
     public WebSocket socket;
     public EncUtil.ChaChaSession chaChaSession;
+    public int status;
 
     public void connect() throws IOException {
         byte[] key = EncUtil.mkChaChaKey();
@@ -92,15 +103,57 @@ public class ConnectionsManager extends WebSocketListener {
         headers.put("Authorization", "Basic " + EncUtil.publicEncode(key));
 
         socket = WebSocketClient.open(TMicro.SERVER, "/", headers, this);
+        TMApi.InitConnection request = new TMApi.InitConnection();
+        request.layer = TMApi.LAYER;
+        request.appVersion = TMicro.VERSION_INT;
+        request.platform = System.getProperty("microedition.platform");
+        if (request.platform == null) {
+            request.platform = "n/a";
+        }
+        request.systemVersion = System.getProperty("microedition.profiles");
+        if (request.systemVersion == null) {
+            request.systemVersion = "n/a";
+        } else {
+            request.systemVersion += " / " + System.getProperty("microedition.configuration");
+        }
+        accountPk = EncUtil.loadSM2PrivateKey(accountSession);
+        request.session = EncUtil.generateSM2PublicKey(accountPk).getQ().getEncoded(true);
+        sendRequest(request, new TMCallback() {
+            public void onSuccess(TMApi.Object response) {
+                TMApi.ConnInitTemp temp = (TMApi.ConnInitTemp) response;
+                try {
+                    tmContinue(EncUtil.processSM2(accountPk, false, temp.data));
+                } catch (IOException e) {
+                    System.err.println("Verify connection failed");
+                    e.printStackTrace();
+                }
+            }
+
+            public void onFailure(int code, String message) {
+                System.err.println("Init failed, code=" + code + ", message=" + message);
+            }
+        });
+    }
+
+    private void tmContinue(byte[] verified) throws IOException {
+        TMApi.VerifyConnection request = new TMApi.VerifyConnection();
+        request.data = verified;
+        sendRequest(request, new TMCallback() {
+            public void onSuccess(TMApi.Object response) {
+                System.out.println("Init connection finished: " + response);
+            }
+
+            public void onFailure(int code, String message) {
+                System.err.println("Init failed, code=" + code + ", message=" + message);
+            }
+        });
     }
 
     public void disconnect() {
-
         socket.cancel();
-
     }
 
-    public void onPing(final WebSocket socket, final byte[] payload) {
+    protected void onPing(final WebSocket socket, final byte[] payload) {
         try {
             socket.pong(payload);
             System.out.println("Pong sent");
@@ -110,18 +163,20 @@ public class ConnectionsManager extends WebSocketListener {
         }
     }
 
-    public void onPong(WebSocket socket, byte[] payload) {
+    protected void onPong(WebSocket socket, byte[] payload) {
         System.out.println("Pong received");
     }
 
-    public void onMessage(WebSocket socket, byte[] message) {
+    protected void onMessage(WebSocket socket, byte[] message) {
         try {
             if (message[0] == (byte) 0x1f && message[1] == (byte) 0x8b) {
-                ByteArrayOutputStream gzOut = new ByteArrayOutputStream();
-                Gzip.gunzip(new ByteArrayInputStream(message), gzOut);
+                ByteArrayOutputStream gzOut = IoUtil.out();
+                Gzip.gunzip(IoUtil.getIn(message), gzOut);
                 message = gzOut.toByteArray();
             }
-            onMessage(socket, Strings.fromByteArray(chaChaSession.readMessage(message)));
+            message = chaChaSession.readMessage(message);
+            TMApi.Object update = TMClassStore.deserializeFromSteam(new SerializedData(message), true);
+            processUpdate(update);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (CryptoException e) {
@@ -129,25 +184,20 @@ public class ConnectionsManager extends WebSocketListener {
         }
     }
 
-
-    public void onMessage(WebSocket socket, String message) {
-        System.out.println("Received: " + message);
-    }
-
-    public void onClose(WebSocket socket, int code, String reason) {
+    protected void onClose(WebSocket socket, int code, String reason) {
         System.out.println("Connection closed, code=" + code + ", reason=" + reason);
     }
 
-    public void onFailure(WebSocket socket, Throwable t) {
+    protected void onFailure(WebSocket socket, Throwable t) {
         System.out.println("Connection failed: ");
         t.printStackTrace();
     }
 
-    public void sendRequestRaw(byte[] request) throws IOException {
+    private void sendRaw(byte[] request) throws IOException {
         try {
             request = chaChaSession.mkMessage(request);
             if (request.length > 1024) {
-                ByteArrayOutputStream gzOut = new ByteArrayOutputStream();
+                ByteArrayOutputStream gzOut = IoUtil.out();
                 Gzip.gzip(IoUtil.getIn(request), gzOut);
                 request = gzOut.toByteArray();
             }
@@ -155,6 +205,51 @@ public class ConnectionsManager extends WebSocketListener {
         } catch (CryptoException e) {
             e.printStackTrace();
             throw new IOException(e.getMessage());
+        }
+    }
+
+    private volatile int requestId = 0;
+    private final HashMap callbacks = new HashMap();
+
+    private void sendRequest(TMApi.Function request, TMCallback callback) throws IOException {
+        if (TMicro.DEBUG) {
+            System.out.println("Java send " + request);
+        }
+
+        SerializedData data = new SerializedData();
+
+        if (callback == null) {
+            TMClassStore.serializeToStream(data, request);
+        } else {
+            TMApi.RpcRequest requestWithId = new TMApi.RpcRequest();
+            synchronized (this) {
+                requestWithId.requestId = requestId++;
+            }
+            callbacks.put(new Integer(requestWithId.requestId), callback);
+            requestWithId.request = request;
+            TMClassStore.serializeToStream(data, requestWithId);
+        }
+
+        sendRaw(data.toByteArray());
+    }
+
+    private void processUpdate(TMApi.Object update) {
+        if (update instanceof TMApi.RpcResponse) {
+            TMApi.RpcResponse response = (TMApi.RpcResponse) update;
+            if (TMicro.DEBUG) {
+                System.out.println("Java received " + response.response);
+            }
+            TMCallback callback = (TMCallback) callbacks.remove(new Integer(response.requestId));
+            if (callback == null) {
+                System.err.println("Unknown response of requestId " + response.requestId);
+                return;
+            }
+            if (response.response instanceof TMApi.Error) {
+                TMApi.Error error = (TMApi.Error) response.response;
+                callback.onFailure(error.code, error.message);
+            } else {
+                callback.onSuccess(response.response);
+            }
         }
     }
 

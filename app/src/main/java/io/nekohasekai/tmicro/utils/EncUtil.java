@@ -1,14 +1,19 @@
 package io.nekohasekai.tmicro.utils;
 
+import j2me.math.BigInteger;
 import j2me.security.SecureRandom;
 import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.ec.CustomNamedCurves;
 import org.bouncycastle.crypto.engines.SM2Engine;
+import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
 import org.bouncycastle.crypto.modes.ChaCha20Poly1305;
 import org.bouncycastle.crypto.params.*;
+import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.math.ec.FixedPointCombMultiplier;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Base64;
 
@@ -29,9 +34,13 @@ public class EncUtil {
 
     }
 
+    private static ECDomainParameters sm2Params;
+
     public static ECDomainParameters getSM2DomainParams() {
-        //noinspection ConstantConditions
-        return EncUtil.toDomainParams(CustomNamedCurves.getByName("sm2p256v1"));
+        if (sm2Params == null) {
+            sm2Params = EncUtil.toDomainParams(CustomNamedCurves.getByName("sm2p256v1"));
+        }
+        return sm2Params;
     }
 
     public static ECDomainParameters toDomainParams(X9ECParameters x9ECParameters) {
@@ -46,9 +55,9 @@ public class EncUtil {
     private static ECPublicKeyParameters pubKey;
 
     public static void loadPubKey() {
+        getSM2DomainParams();
         try {
-            ECDomainParameters params = getSM2DomainParams();
-            pubKey = new ECPublicKeyParameters(params.getCurve().decodePoint(IoUtil.readResBytes("public.key")), params);
+            pubKey = new ECPublicKeyParameters(sm2Params.getCurve().decodePoint(IoUtil.readResBytes("public.key")), sm2Params);
         } catch (Exception e) {
             e.printStackTrace();
             throw new IllegalStateException();
@@ -58,6 +67,24 @@ public class EncUtil {
     public static String publicEncode(byte[] content) {
         loadPubKey();
         return Base64.toBase64String(processSM2(pubKey, true, content));
+    }
+
+    public static ECPrivateKeyParameters generateSM2PrivateKey() {
+        getSM2DomainParams();
+        ECKeyPairGenerator generator = new ECKeyPairGenerator();
+        generator.init(new ECKeyGenerationParameters(getSM2DomainParams(), secureRandom));
+        AsymmetricCipherKeyPair keyPair = generator.generateKeyPair();
+        return (ECPrivateKeyParameters) keyPair.getPrivate();
+    }
+
+    public static ECPrivateKeyParameters loadSM2PrivateKey(byte[] key) {
+        getSM2DomainParams();
+        return new ECPrivateKeyParameters(new BigInteger(key), sm2Params);
+    }
+
+    public static ECPublicKeyParameters generateSM2PublicKey(ECPrivateKeyParameters privateKey) {
+        ECPoint Q = new FixedPointCombMultiplier().multiply(sm2Params.getG(), privateKey.getD());
+        return new ECPublicKeyParameters(Q, sm2Params);
     }
 
     public static byte[] mkChaChaKey() {
