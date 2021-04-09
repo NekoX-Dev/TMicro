@@ -21,6 +21,9 @@
         <j2me.midlet.version>${version}</j2me.midlet.version>
         <j2me.midlet.configuration>CLDC-1.1</j2me.midlet.configuration>
         <j2me.midlet.profile>MIDP-2.0</j2me.midlet.profile>
+        <j2me.midlet.permissions>
+            javax.microedition.io.Connector.comm,javax.microedition.io.Connector.datagram,javax.microedition.io.Connector.datagramreceiver,javax.microedition.io.Connector.http,javax.microedition.io.Connector.https,javax.microedition.io.Connector.ssl,javax.microedition.io.Connector.serversocket,javax.microedition.io.Connector.socket,javax.microedition.io.PushRegistry,javax.microedition.io.Connector.sms,javax.microedition.io.Connector.cbs,javax.microedition.io.Connector.mms,javax.wireless.messaging.sms.send,javax.wireless.messaging.sms.receive,javax.wireless.messaging.cbs.receive,javax.wireless.messaging.mms.send,javax.wireless.messaging.mms.receive,javax.microedition.io.Connector.bluetooth.client,javax.microedition.io.Connector.bluetooth.server,javax.microedition.io.Connector.obex.client,javax.microedition.io.Connector.obex.server,javax.microedition.io.Connector.obex.server.tcp,javax.microedition.io.Connector.obex.client.tcp,javax.microedition.location.Orientation,javax.microedition.location.Location,javax.microedition.location.ProximityListener,javax.microedition.apdu.sat,javax.microedition.apdu.aid,javax.microedition.jcrmi,javax.microedition.io.Connector.sip,javax.microedition.io.Connector.sips,javax.microedition.sensor.PrivateSensor,javax.microedition.sensor.ProtectedSensor,javax.microedition.io.Connector.sensor,javax.microedition.io.Connector.file.write,javax.microedition.io.Connector.file.read,javax.microedition.media.control.RecordControl,javax.microedition.media.control.VideoControl.getSnapshot
+        </j2me.midlet.permissions>
         <j2me.proguard>false</j2me.proguard>
         <wtk.home>${project.basedir}/../libs/wtk</wtk.home>
     </properties>
@@ -129,18 +132,15 @@
                     <obfuscate>${j2me.proguard}</obfuscate>
                     <!-- Optional, populated by default-->
                     <jadAttributes>
-                        <MIDlet-1>TMicro,,io.nekohasekai.tmicro.TMicro</MIDlet-1>
+                        <MIDlet-1>TMicro,/icon.png,io.nekohasekai.tmicro.TMicro</MIDlet-1>
                         <MIDlet-Icon>/icon.png</MIDlet-Icon>
                         <MicroEdition-Profile>${j2me.midlet.profile}</MicroEdition-Profile>
                         <MicroEdition-Configuration>${j2me.midlet.configuration}</MicroEdition-Configuration>
                         <MIDlet-Vendor>${j2me.midlet.vendor}</MIDlet-Vendor>
-                        <MIDlet-Description>${description}</MIDlet-Description>
+                        <MIDlet-Description>${project.description}</MIDlet-Description>
                         <MIDlet-Info-URL>http://github.com/NekoX-Dev/TMicro</MIDlet-Info-URL>
-                        <MIDlet-Permissions>
-                            javax.microedition.io.Connector.comm,javax.microedition.io.Connector.datagram,javax.microedition.io.Connector.datagramreceiver,javax.microedition.io.Connector.http,javax.microedition.io.Connector.https,javax.microedition.io.Connector.ssl,javax.microedition.io.Connector.serversocket,javax.microedition.io.Connector.socket,javax.microedition.io.PushRegistry,javax.microedition.io.Connector.sms,javax.microedition.io.Connector.cbs,javax.microedition.io.Connector.mms,javax.wireless.messaging.sms.send,javax.wireless.messaging.sms.receive,javax.wireless.messaging.cbs.receive,javax.wireless.messaging.mms.send,javax.wireless.messaging.mms.receive,javax.microedition.io.Connector.bluetooth.client,javax.microedition.io.Connector.bluetooth.server,javax.microedition.io.Connector.obex.client,javax.microedition.io.Connector.obex.server,javax.microedition.io.Connector.obex.server.tcp,javax.microedition.io.Connector.obex.client.tcp,javax.microedition.location.Orientation,javax.microedition.location.Location,javax.microedition.location.ProximityListener,javax.microedition.apdu.sat,javax.microedition.apdu.aid,javax.microedition.jcrmi,javax.microedition.io.Connector.sip,javax.microedition.io.Connector.sips,javax.microedition.sensor.PrivateSensor,javax.microedition.sensor.ProtectedSensor,javax.microedition.io.Connector.sensor,javax.microedition.io.Connector.file.write,javax.microedition.io.Connector.file.read,javax.microedition.media.control.RecordControl,javax.microedition.media.control.VideoControl.getSnapshot
-                        </MIDlet-Permissions>
+                        <MIDlet-Permissions>${j2me.midlet.permissions}</MIDlet-Permissions>
                         <Nokia-MIDlet-No-Exit>true</Nokia-MIDlet-No-Exit>
-                        <SEMC-StandbyApplication>Y</SEMC-StandbyApplication>
                     </jadAttributes>
                     <midlets>
                         <MIDlet>
@@ -151,19 +151,16 @@
                     </midlets>
                     <archive>
                         <manifestEntries>
-                            <MIDlet-1>TMicro,,io.nekohasekai.tmicro.TMicro</MIDlet-1>
+                            <MIDlet-1>TMicro,/icon.png,io.nekohasekai.tmicro.TMicro</MIDlet-1>
                             <MIDlet-Name>${j2me.midlet.name}</MIDlet-Name>
                             <MIDlet-Icon>/icon.png</MIDlet-Icon>
                             <MIDlet-Vendor>${j2me.midlet.vendor}</MIDlet-Vendor>
                             <MIDlet-Version>${j2me.midlet.version}</MIDlet-Version>
                             <MicroEdition-Configuration>${j2me.midlet.configuration}</MicroEdition-Configuration>
                             <MicroEdition-Profile>${j2me.midlet.profile}</MicroEdition-Profile>
-                            <MIDlet-Description>Telegram client for Micro Phone</MIDlet-Description>
-                            <MIDlet-Permissions>
-                                javax.microedition.io.Connector.comm,javax.microedition.io.Connector.datagram,javax.microedition.io.Connector.datagramreceiver,javax.microedition.io.Connector.http,javax.microedition.io.Connector.https,javax.microedition.io.Connector.ssl,javax.microedition.io.Connector.serversocket,javax.microedition.io.Connector.socket,javax.microedition.io.PushRegistry,javax.microedition.io.Connector.sms,javax.microedition.io.Connector.cbs,javax.microedition.io.Connector.mms,javax.wireless.messaging.sms.send,javax.wireless.messaging.sms.receive,javax.wireless.messaging.cbs.receive,javax.wireless.messaging.mms.send,javax.wireless.messaging.mms.receive,javax.microedition.io.Connector.bluetooth.client,javax.microedition.io.Connector.bluetooth.server,javax.microedition.io.Connector.obex.client,javax.microedition.io.Connector.obex.server,javax.microedition.io.Connector.obex.server.tcp,javax.microedition.io.Connector.obex.client.tcp,javax.microedition.location.Orientation,javax.microedition.location.Location,javax.microedition.location.ProximityListener,javax.microedition.apdu.sat,javax.microedition.apdu.aid,javax.microedition.jcrmi,javax.microedition.io.Connector.sip,javax.microedition.io.Connector.sips,javax.microedition.sensor.PrivateSensor,javax.microedition.sensor.ProtectedSensor,javax.microedition.io.Connector.sensor,javax.microedition.io.Connector.file.write,javax.microedition.io.Connector.file.read,javax.microedition.media.control.RecordControl,javax.microedition.media.control.VideoControl.getSnapshot
-                            </MIDlet-Permissions>
+                            <MIDlet-Description>${project.description}</MIDlet-Description>
+                            <MIDlet-Permissions>${j2me.midlet.permissions}</MIDlet-Permissions>
                             <Nokia-MIDlet-No-Exit>true</Nokia-MIDlet-No-Exit>
-                            <SEMC-StandbyApplication>Y</SEMC-StandbyApplication>
                         </manifestEntries>
                     </archive>
                     <!-- -->

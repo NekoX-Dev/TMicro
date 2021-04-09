@@ -29,7 +29,7 @@ public class SecureRandom extends java.util.Random {
     }
 
     public SecureRandom(byte[] inSeed) {
-        this();
+        this(new DigestRandomGenerator(new SM3Digest()));
         setSeed(inSeed);
     }
 

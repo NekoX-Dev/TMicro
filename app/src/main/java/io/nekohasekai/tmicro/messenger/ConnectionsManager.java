@@ -1,18 +1,21 @@
 package io.nekohasekai.tmicro.messenger;
 
+import com.googlecode.compress_j2me.gzip.Gzip;
 import io.nekohasekai.tmicro.TMicro;
 import io.nekohasekai.tmicro.utils.EncUtil;
+import io.nekohasekai.tmicro.utils.IoUtil;
 import io.nekohasekai.tmicro.utils.RecordUtil;
 import io.nekohasekai.tmicro.utils.rms.RecordDatabase;
 import io.nekohasekai.wsm.WebSocket;
 import io.nekohasekai.wsm.WebSocketClient;
 import io.nekohasekai.wsm.WebSocketListener;
 import j2me.util.HashMap;
+import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.util.Strings;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import javax.microedition.rms.RecordStore;
+import javax.microedition.rms.RecordStoreException;
+import java.io.*;
 
 public class ConnectionsManager extends WebSocketListener {
 
@@ -44,7 +47,13 @@ public class ConnectionsManager extends WebSocketListener {
 
     public ConnectionsManager(int accountNum) throws IOException {
         this.accountNum = accountNum;
-        this.db = RecordUtil.openPrivate("tgnet" + accountToken);
+        if (TMicro.DEBUG) {
+            try {
+                RecordStore.deleteRecordStore("tgnet" + accountNum);
+            } catch (RecordStoreException ignored) {
+            }
+        }
+        db = RecordUtil.openPrivate("tgnet" + accountNum);
 
         loadConfig();
     }
@@ -73,10 +82,11 @@ public class ConnectionsManager extends WebSocketListener {
     }
 
     public WebSocket socket;
-    public byte[] key;
+    public EncUtil.ChaChaSession chaChaSession;
 
     public void connect() throws IOException {
-        key = EncUtil.generateChaCha20Poly1305Key();
+        byte[] key = EncUtil.mkChaChaKey();
+        chaChaSession = new EncUtil.ChaChaSession(key);
 
         HashMap headers = new HashMap();
         headers.put("Authorization", "Basic " + EncUtil.publicEncode(key));
@@ -84,7 +94,13 @@ public class ConnectionsManager extends WebSocketListener {
         socket = WebSocketClient.open(TMicro.SERVER, "/", headers, this);
     }
 
-    public void onPing(WebSocket socket, byte[] payload) {
+    public void disconnect() {
+
+        socket.cancel();
+
+    }
+
+    public void onPing(final WebSocket socket, final byte[] payload) {
         try {
             socket.pong(payload);
             System.out.println("Pong sent");
@@ -99,9 +115,20 @@ public class ConnectionsManager extends WebSocketListener {
     }
 
     public void onMessage(WebSocket socket, byte[] message) {
-        EncUtil.processChaCha20Poly1305(key, true, message);
-        onMessage(socket, Strings.fromByteArray(message));
+        try {
+            if (message[0] == (byte) 0x1f && message[1] == (byte) 0x8b) {
+                ByteArrayOutputStream gzOut = new ByteArrayOutputStream();
+                Gzip.gunzip(new ByteArrayInputStream(message), gzOut);
+                message = gzOut.toByteArray();
+            }
+            onMessage(socket, Strings.fromByteArray(chaChaSession.readMessage(message)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (CryptoException e) {
+            e.printStackTrace();
+        }
     }
+
 
     public void onMessage(WebSocket socket, String message) {
         System.out.println("Received: " + message);
@@ -116,8 +143,19 @@ public class ConnectionsManager extends WebSocketListener {
         t.printStackTrace();
     }
 
-    public void sendRequestRaw(String content) throws IOException {
-        socket.send(EncUtil.processChaCha20Poly1305(key, true, Strings.toByteArray(content)));
+    public void sendRequestRaw(byte[] request) throws IOException {
+        try {
+            request = chaChaSession.mkMessage(request);
+            if (request.length > 1024) {
+                ByteArrayOutputStream gzOut = new ByteArrayOutputStream();
+                Gzip.gzip(IoUtil.getIn(request), gzOut);
+                request = gzOut.toByteArray();
+            }
+            socket.send(request);
+        } catch (CryptoException e) {
+            e.printStackTrace();
+            throw new IOException(e.getMessage());
+        }
     }
 
 }

@@ -1,6 +1,5 @@
 package io.nekohasekai.tmicro.utils;
 
-import io.nekohasekai.tmicro.TMicro;
 import javolution.io.UTF8StreamReader;
 import javolution.io.UTF8StreamWriter;
 
@@ -10,6 +9,10 @@ public class IoUtil {
 
     public static final int DEFAULT_BUFFER_SIZE = 2 << 12;
     public static final int EOF = -1;
+
+    public static DataInputStream getIn(byte[] bytes) {
+        return new DataInputStream(new ByteArrayInputStream(bytes));
+    }
 
     public static void close(Reader reader) {
         try {
@@ -57,7 +60,6 @@ public class IoUtil {
     public static byte[] readByteArray(InputStream in) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         copy(in, out);
-        close(out);
         return out.toByteArray();
     }
 
@@ -84,7 +86,7 @@ public class IoUtil {
 
     public static InputStream getResIn(String path) throws IOException {
         if (!path.startsWith("/")) path = "/" + path;
-        InputStream in = TMicro.class.getResourceAsStream(path);
+        InputStream in = IoUtil.class.getResourceAsStream(path);
         if (in == null) {
             throw new IOException(path + " not found");
         }

@@ -1,10 +1,12 @@
 package io.nekohasekai.wsm;
 
-import com.googlecode.compress_j2me.gzip.Gzip;
+import io.nekohasekai.tmicro.utils.IoUtil;
+import j2me.lang.IllegalStateException;
 import j2me.security.SecureRandom;
 import j2me.util.HashMap;
 import j2me.util.Iterator;
 import j2me.util.Map;
+import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Base64;
 
@@ -38,7 +40,6 @@ public class WebSocketClient implements WebSocket {
     private static final int PAYLOAD_LONG = 127;
     private static final int CLOSE_CLIENT_GOING_AWAY = 1001;
     private static final int CLOSE_NO_STATUS_CODE = 1005;
-    private static final long DEFAULT_MINIMUM_DEFLATE_SIZE = 1024L;
 
     private boolean isRunning;
     private Thread inboundThread;
@@ -73,7 +74,6 @@ public class WebSocketClient implements WebSocket {
         requestHeaders.put("Upgrade", "WebSocket");
         requestHeaders.put("Connection", "Upgrade");
         requestHeaders.put("Sec-WebSocket-Version", "13");
-        requestHeaders.put("Sec-WebSocket-Extensions", "permessage-deflate");
         requestHeaders.put("Sec-WebSocket-Key", wsKey);
 
         String EOL = "\r\n";
@@ -104,7 +104,7 @@ public class WebSocketClient implements WebSocket {
 
         do {
             int data = input.read();
-            if (data == -1) throw new IOException("Unexpected EOF.");
+            if (data == -1) throw new EOFException("Unexpected EOF.");
             response.write(data);
 
             lB1 = lB2;
@@ -115,17 +115,33 @@ public class WebSocketClient implements WebSocket {
             // build mini queue to check for \r\n\r\n sequence in handshake
         } while (lB1 != 13 || lB2 != 10 || lB3 != 13 || lB4 != 10);
 
-        // There is no toString(format) in J2ME!!!
-        //noinspection StringOperationCanBeSimplified
-        String responseText = new String(response.toByteArray(), "UTF-8");
+        String responseText = Strings.fromByteArray(response.toByteArray());
 
-        System.out.println("Request: ");
-        System.out.println(request.toString());
+        if (responseText.indexOf("HTTP/1.1 101 Switching Protocols") == -1) {
+            throw new IOException(responseText);
+        }
 
-        System.out.println("Response: \n");
+        SHA1Digest digest = new SHA1Digest();
+        byte[] keyArr = Strings.toByteArray(wsKey + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
+        digest.update(keyArr, 0, keyArr.length);
+        byte[] sha1 = new byte[20];
+        digest.doFinal(sha1, 0);
+        String expected = Base64.toBase64String(sha1);
+        String acceptKey = "null";
+
+        String acceptHeader = "Sec-WebSocket-Accept: ";
+        int fromLength = responseText.indexOf(acceptHeader);
+        if (fromLength != -1) {
+            fromLength += acceptHeader.length();
+            int toLength = responseText.indexOf("\n", fromLength) - 1;
+            acceptKey = responseText.substring(fromLength, toLength);
+        }
+
+        if (!expected.equalsIgnoreCase(acceptKey)) {
+            throw new IllegalStateException("Expected 'Sec-WebSocket-Accept' header value '" + expected + "' but was '" + acceptKey + "'");
+        }
+
         System.out.println(responseText);
-
-        messageDeflate = responseText.indexOf("permessage-deflate") != -1;
 
         listener.onOpen(this);
 
@@ -142,12 +158,13 @@ public class WebSocketClient implements WebSocket {
     }
 
     public void send(byte[] data, int opCode) throws IOException {
+        if (!isRunning) throw new IllegalStateException("Connection closed");
+
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(bytes);
 
-        boolean messageDeflate = this.messageDeflate && data.length >= DEFAULT_MINIMUM_DEFLATE_SIZE;
+        out.write(((1 << 7) | opCode) & 0xFF);
 
-        out.write(((!messageDeflate ? 1 << 7 : 11 << 6) | opCode) & 0xFF);
         if (data.length < 126) {
             out.write(((1 << 7) | data.length) & 0xFF);
         } else if (data.length < 2 << 16) {
@@ -156,13 +173,6 @@ public class WebSocketClient implements WebSocket {
         } else {
             out.write(((1 << 7) | 127) & 0xFF);
             out.writeLong(data.length);
-        }
-
-        if (messageDeflate) {
-            ByteArrayInputStream deflateIn = new ByteArrayInputStream(data);
-            ByteArrayOutputStream deflateOut = new ByteArrayOutputStream();
-            Gzip.deflate(deflateIn, deflateOut);
-            data = deflateOut.toByteArray();
         }
 
         SecureRandom.INSTANCE.nextBytes(maskKey);
@@ -203,7 +213,7 @@ public class WebSocketClient implements WebSocket {
         ByteArrayOutputStream controlFrame = new ByteArrayOutputStream();
         DataOutputStream controlOutput = new DataOutputStream(controlFrame);
         controlOutput.writeShort(code);
-        controlOutput.writeUTF(reason);
+        controlOutput.write(Strings.toByteArray(reason));
 
         send(controlFrame.toByteArray(), OPCODE_CONTROL_CLOSE);
     }
@@ -231,7 +241,11 @@ public class WebSocketClient implements WebSocket {
 
     private void loopMessage() throws IOException {
 
-        int b0 = input.read() & 0xFF;
+        int b0 = input.read();
+
+        if (b0 == -1) throw new EOFException("Connection closed");
+
+        b0 &= 0xFF;
         int opcode = b0 & B0_MASK_OPCODE;
 
         boolean isFinalFrame = (b0 & B0_FLAG_FIN) != 0;
@@ -240,14 +254,7 @@ public class WebSocketClient implements WebSocket {
             throw new IOException("Control frames must be final.");
         }
         boolean reservedFlag1 = (b0 & B0_FLAG_RSV1) != 0;
-        boolean readingCompressedMessage = false;
-        if (reservedFlag1) {
-            if (opcode == OPCODE_BINARY || opcode == OPCODE_TEXT) {
-                readingCompressedMessage = true;
-            } else if (opcode != OPCODE_CONTINUATION) {
-                throw new IOException("Unexpected rsv1 flag, opcode=" + opcode);
-            }
-        }
+        if (reservedFlag1) throw new IOException("Unexpected rsv1 flag");
         boolean reservedFlag2 = (b0 & B0_FLAG_RSV2) != 0;
         if (reservedFlag2) throw new IOException("Unexpected rsv2 flag");
         boolean reservedFlag3 = (b0 & B0_FLAG_RSV3) != 0;
@@ -298,7 +305,7 @@ public class WebSocketClient implements WebSocket {
                 } else if (frameLength > 0) {
                     DataInputStream closeIn = new DataInputStream(new ByteArrayInputStream(message));
                     code = closeIn.readShort();
-                    reason = closeIn.readUTF();
+                    reason = Strings.fromByteArray(IoUtil.readByteArray(closeIn));
                 }
 
                 listener.onClose(this, code, reason);
@@ -328,13 +335,6 @@ public class WebSocketClient implements WebSocket {
             }
         }
 
-        if (readingCompressedMessage) {
-            ByteArrayInputStream inflateIn = new ByteArrayInputStream(message);
-            ByteArrayOutputStream inflateOut = new ByteArrayOutputStream();
-            Gzip.inflate(inflateIn, inflateOut);
-            message = inflateOut.toByteArray();
-        }
-
         if (opcode == OPCODE_TEXT) {
             listener.onMessage(this, Strings.fromByteArray(message));
         } else {
@@ -348,9 +348,15 @@ public class WebSocketClient implements WebSocket {
 
         try {
             while (isRunning) loopMessage();
+        } catch (EOFException eof) {
+            if (isRunning) {
+                isRunning = false;
+                listener.onClose(this, CLOSE_NO_STATUS_CODE, "");
+            }
         } catch (Throwable ex) {
             isRunning = false;
             listener.onFailure(this, ex);
+            cancel();
         }
     }
 

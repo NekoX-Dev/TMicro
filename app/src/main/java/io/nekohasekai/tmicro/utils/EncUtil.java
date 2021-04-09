@@ -3,11 +3,13 @@ package io.nekohasekai.tmicro.utils;
 import j2me.security.SecureRandom;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.ec.CustomNamedCurves;
 import org.bouncycastle.crypto.engines.SM2Engine;
 import org.bouncycastle.crypto.modes.ChaCha20Poly1305;
 import org.bouncycastle.crypto.params.*;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Base64;
 
 public class EncUtil {
@@ -58,22 +60,59 @@ public class EncUtil {
         return Base64.toBase64String(processSM2(pubKey, true, content));
     }
 
-    public static byte[] generateChaCha20Poly1305Key() {
+    public static byte[] mkChaChaKey() {
         byte[] key = new byte[32];
         secureRandom.nextBytes(key);
         return key;
     }
 
-    public static byte[] processChaCha20Poly1305(byte[] key, boolean forEncryption, byte[] content) {
-        byte[] nonce = new byte[12];
-        secureRandom.nextBytes(nonce);
+    public static class ChaChaSession {
 
-        AEADParameters parameters = new AEADParameters(new KeyParameter(key), 128, nonce);
-        ChaCha20Poly1305 cipher = new ChaCha20Poly1305();
-        cipher.init(forEncryption, parameters);
-        cipher.processBytes(content, 0, content.length, content, 0);
-        return content;
+        private final byte[] key;
+        private final SecureRandom nonceIn;
+        private final SecureRandom nonceOut;
+        public boolean isServer = false;
+        private final ChaCha20Poly1305 cipher = new ChaCha20Poly1305();
+
+        public ChaChaSession(byte[] key) {
+            this.key = key;
+            this.nonceIn = new SecureRandom(genSeed(false));
+            this.nonceOut = new SecureRandom(genSeed(true));
+        }
+
+        /**
+         * @noinspection SameParameterValue
+         */
+        private byte[] genSeed(boolean output) {
+            if (output ^ isServer) {
+                return Arrays.append(key, (byte) 0);
+            } else {
+                return Arrays.append(key, (byte) 1);
+            }
+        }
+
+        private byte[] process(boolean forEncryption, byte[] content, byte[] nonce) throws CryptoException {
+            AEADParameters parameters = new AEADParameters(new KeyParameter(key), 128, nonce);
+            cipher.init(forEncryption, parameters);
+            byte[] result = new byte[content.length * 2];
+            int offset = cipher.processBytes(content, 0, content.length, result, 0);
+            return Arrays.copyOfRange(result, 0, offset + cipher.doFinal(result, offset));
+        }
+
+        public byte[] mkMessage(byte[] content) throws CryptoException {
+            byte[] nonce = new byte[12];
+            nonceOut.nextBytes(nonce);
+            return process(true, content, nonce);
+        }
+
+        public byte[] readMessage(byte[] message) throws CryptoException {
+            byte[] nonce = new byte[12];
+            nonceIn.nextBytes(nonce);
+            return process(false, message, nonce);
+        }
+
     }
+
 
 }
 

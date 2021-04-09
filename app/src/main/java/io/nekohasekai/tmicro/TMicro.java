@@ -4,10 +4,14 @@ import com.sun.lwuit.Display;
 import io.nekohasekai.tmicro.messenger.ConnectionsManager;
 import io.nekohasekai.tmicro.ui.LaunchActivity;
 import io.nekohasekai.tmicro.utils.ResUtil;
+import j2me.security.SecureRandom;
 import j2me.util.HashMap;
+import org.bouncycastle.util.Strings;
+import org.bouncycastle.util.encoders.Base64;
 
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
+import java.io.IOException;
 
 public class TMicro extends MIDlet {
 
@@ -37,7 +41,6 @@ public class TMicro extends MIDlet {
         if (ConnectionsManager.getInstance().accountStatus != ConnectionsManager.STATUS_OK) {
             new LaunchActivity().show();
         }
-
     }
 
     protected void pauseApp() {
