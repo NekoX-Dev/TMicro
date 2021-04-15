@@ -18,6 +18,7 @@
         <module>websocket</module>
         <module>gzip</module>
         <module>lwuit</module>
+        <module>perst</module>
     </modules>
 
 </project>

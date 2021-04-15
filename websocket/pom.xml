@@ -46,7 +46,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <source>1.3</source>
-                    <target>1.1</target>
+                    <target>1.3</target>
                     <compilerArgs>
                         <arg>-verbose</arg>
                         <arg>-bootclasspath</arg>

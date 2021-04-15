@@ -1,12 +1,14 @@
 package io.nekohasekai.tmicro.messenger;
 
 import com.googlecode.compress_j2me.gzip.Gzip;
+import com.jcraft.jzlib.JZlib;
 import io.nekohasekai.tmicro.TMicro;
 import io.nekohasekai.tmicro.tmnet.SerializedData;
 import io.nekohasekai.tmicro.tmnet.TMApi;
 import io.nekohasekai.tmicro.tmnet.TMClassStore;
 import io.nekohasekai.tmicro.utils.EncUtil;
 import io.nekohasekai.tmicro.utils.IoUtil;
+import io.nekohasekai.tmicro.utils.LogUtil;
 import io.nekohasekai.tmicro.utils.RecordUtil;
 import io.nekohasekai.tmicro.utils.rms.RecordDatabase;
 import io.nekohasekai.wsm.WebSocket;
@@ -16,6 +18,7 @@ import j2me.lang.IllegalStateException;
 import j2me.util.HashMap;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
+import org.bouncycastle.util.encoders.Base64;
 
 import javax.microedition.rms.RecordStore;
 import javax.microedition.rms.RecordStoreException;
@@ -41,6 +44,7 @@ public class ConnectionsManager extends WebSocketListener {
     public RecordDatabase db;
 
     public int accountNum;
+    public String proxy;
     public byte[] accountSession;
     public int accountStatus;
 
@@ -69,6 +73,7 @@ public class ConnectionsManager extends WebSocketListener {
                 throw new IOException();
             }
         } catch (IOException ignored) {
+            proxy = "";
             accountSession = EncUtil.generateSM2PrivateKey().getD().toByteArray();
             writeConfig();
             return;
@@ -78,6 +83,7 @@ public class ConnectionsManager extends WebSocketListener {
             throw new IllegalStateException("Unknown database version " + version);
         }
 
+        proxy = input.readString(true);
         accountSession = input.readByteArray(true);
         accountStatus = input.readInt32(true);
         input.cleanup();
@@ -86,6 +92,7 @@ public class ConnectionsManager extends WebSocketListener {
     private void writeConfig() throws IOException {
         SerializedData output = db.getOut(1);
         output.writeInt32(1);
+        output.writeString(proxy);
         output.writeByteArray(accountSession);
         output.writeInt32(accountStatus);
         output.flush();
@@ -96,11 +103,20 @@ public class ConnectionsManager extends WebSocketListener {
     public int status;
 
     public void connect() throws IOException {
+        if (socket != null && socket.isActive()) {
+            LogUtil.warn("Already connected");
+            throw new IOException("Already connected");
+        }
+
         byte[] key = EncUtil.mkChaChaKey();
         chaChaSession = new EncUtil.ChaChaSession(key);
 
         HashMap headers = new HashMap();
-        headers.put("Authorization", "Basic " + EncUtil.publicEncode(key));
+        SerializedData data = new SerializedData();
+        data.writeByteArray(key);
+        data.writeInt32((int) (System.currentTimeMillis() / 1000));
+        String authorization = Base64.toBase64String(EncUtil.publicEncode(data.toByteArray()));
+        headers.put("Authorization", "Basic " + authorization);
 
         socket = WebSocketClient.open(TMicro.SERVER, "/", headers, this);
         TMApi.InitConnection request = new TMApi.InitConnection();
@@ -124,13 +140,10 @@ public class ConnectionsManager extends WebSocketListener {
                 try {
                     tmContinue(EncUtil.processSM2(accountPk, false, temp.data));
                 } catch (IOException e) {
-                    System.err.println("Verify connection failed");
-                    e.printStackTrace();
+                    LogUtil.error(e, "Verify connection failed");
+                    TMicro.application.contentActivity.onDisconnected("Verify connection failed");
+                    disconnect();
                 }
-            }
-
-            public void onFailure(int code, String message) {
-                System.err.println("Init failed, code=" + code + ", message=" + message);
             }
         });
     }
@@ -142,15 +155,11 @@ public class ConnectionsManager extends WebSocketListener {
             public void onSuccess(TMApi.Object response) {
                 System.out.println("Init connection finished: " + response);
             }
-
-            public void onFailure(int code, String message) {
-                System.err.println("Init failed, code=" + code + ", message=" + message);
-            }
         });
     }
 
     public void disconnect() {
-        socket.cancel();
+        if (socket != null) socket.cancel();
     }
 
     protected void onPing(final WebSocket socket, final byte[] payload) {
@@ -179,8 +188,6 @@ public class ConnectionsManager extends WebSocketListener {
             processUpdate(update);
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (CryptoException e) {
-            e.printStackTrace();
         }
     }
 
@@ -194,6 +201,11 @@ public class ConnectionsManager extends WebSocketListener {
     }
 
     private void sendRaw(byte[] request) throws IOException {
+        if (socket == null) {
+            throw new IOException("Not started");
+        } else if (!socket.isActive()) {
+            throw new IOException("Not connected");
+        }
         try {
             request = chaChaSession.mkMessage(request);
             if (request.length > 1024) {
@@ -213,7 +225,7 @@ public class ConnectionsManager extends WebSocketListener {
 
     private void sendRequest(TMApi.Function request, TMCallback callback) throws IOException {
         if (TMicro.DEBUG) {
-            System.out.println("Java send " + request);
+            LogUtil.info("Java send " + LogUtil.getClassName(request));
         }
 
         SerializedData data = new SerializedData();
@@ -237,7 +249,7 @@ public class ConnectionsManager extends WebSocketListener {
         if (update instanceof TMApi.RpcResponse) {
             TMApi.RpcResponse response = (TMApi.RpcResponse) update;
             if (TMicro.DEBUG) {
-                System.out.println("Java received " + response.response);
+                LogUtil.info("Java received " + LogUtil.getClassName(response.response));
             }
             TMCallback callback = (TMCallback) callbacks.remove(new Integer(response.requestId));
             if (callback == null) {
@@ -249,6 +261,10 @@ public class ConnectionsManager extends WebSocketListener {
                 callback.onFailure(error.code, error.message);
             } else {
                 callback.onSuccess(response.response);
+            }
+        } else {
+            if (TMicro.DEBUG) {
+                LogUtil.info("Java received unknown " + LogUtil.getClassName(update));
             }
         }
     }

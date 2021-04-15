@@ -17,6 +17,8 @@ import org.bouncycastle.math.ec.FixedPointCombMultiplier;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Base64;
 
+import java.io.IOException;
+
 public class EncUtil {
 
     public static SecureRandom secureRandom = new SecureRandom();
@@ -64,9 +66,9 @@ public class EncUtil {
         }
     }
 
-    public static String publicEncode(byte[] content) {
+    public static byte[] publicEncode(byte[] content) {
         loadPubKey();
-        return Base64.toBase64String(processSM2(pubKey, true, content));
+        return processSM2(pubKey, true, content);
     }
 
     public static ECPrivateKeyParameters generateSM2PrivateKey() {
@@ -118,21 +120,21 @@ public class EncUtil {
             }
         }
 
-        private byte[] process(boolean forEncryption, byte[] content, byte[] nonce) throws CryptoException {
+        private byte[] process(boolean forEncryption, byte[] content, byte[] nonce) throws IOException {
             AEADParameters parameters = new AEADParameters(new KeyParameter(key), 128, nonce);
             cipher.init(forEncryption, parameters);
-            byte[] result = new byte[content.length * 2];
+            byte[] result = new byte[content.length + IoUtil.DEFAULT_BUFFER_SIZE];
             int offset = cipher.processBytes(content, 0, content.length, result, 0);
             return Arrays.copyOfRange(result, 0, offset + cipher.doFinal(result, offset));
         }
 
-        public byte[] mkMessage(byte[] content) throws CryptoException {
+        public byte[] mkMessage(byte[] content) throws IOException {
             byte[] nonce = new byte[12];
             nonceOut.nextBytes(nonce);
             return process(true, content, nonce);
         }
 
-        public byte[] readMessage(byte[] message) throws CryptoException {
+        public byte[] readMessage(byte[] message) throws IOException {
             byte[] nonce = new byte[12];
             nonceIn.nextBytes(nonce);
             return process(false, message, nonce);

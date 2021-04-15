@@ -4,12 +4,12 @@
 #     java -jar proguard.jar @midlets.pro
 #
 
+-keep public class * extends javax.microedition.midlet.MIDlet
+
 -microedition
 -overloadaggressively
+-optimizationpasses 10
 -defaultpackage ''
--allowaccessmodification
-
--keep public class * extends javax.microedition.midlet.MIDlet
 -printseeds
 -printmapping
 -printconfiguration
