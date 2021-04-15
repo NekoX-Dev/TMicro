@@ -1150,6 +1150,24 @@ public final class Arrays
         return false;
     }
 
+    public static String[] reverse(String[] a)
+    {
+        if (a == null)
+        {
+            return null;
+        }
+
+        int p1 = 0, p2 = a.length;
+        String[] result = new String[p2];
+
+        while (--p2 >= 0)
+        {
+            result[p2] = a[p1++];
+        }
+
+        return result;
+    }
+
     public static boolean constantTimeAreEqual(int len, byte[] a, int aOff, byte[] b, int bOff)
     {
         if (null == a)

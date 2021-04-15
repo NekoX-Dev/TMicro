@@ -327,7 +327,7 @@ public class ComboBox extends List {
     /**
      * @inheritDoc
      */
-    protected void fireClicked() {
+    public void fireClicked() {
         List l = createPopupList();
         l.dispatcher = dispatcher;
         l.eventSource = this;

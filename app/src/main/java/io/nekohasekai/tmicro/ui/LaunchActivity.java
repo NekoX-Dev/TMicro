@@ -3,12 +3,12 @@ package io.nekohasekai.tmicro.ui;
 import com.sun.lwuit.*;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
-import com.sun.lwuit.html.HTMLComponent;
+import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.layouts.BoxLayout;
 import io.nekohasekai.tmicro.Locale;
 import io.nekohasekai.tmicro.TMicro;
-import io.nekohasekai.tmicro.Theme;
 import io.nekohasekai.tmicro.messenger.ConnectionsManager;
+import io.nekohasekai.tmicro.tmnet.TMApi;
 import io.nekohasekai.tmicro.utils.LogUtil;
 import io.nekohasekai.tmicro.utils.ui.ColoredButton;
 import io.nekohasekai.tmicro.utils.ui.TextView;
@@ -19,9 +19,31 @@ import java.io.IOException;
 public class LaunchActivity extends BaseActivity {
 
     public void onCreate() {
+        super.onCreate();
 
-        setContentForm(new IntroForm());
+        setContentForm(new SplashForm());
 
+        if (ConnectionsManager.getInstance().accountStatus == 0) {
+            setContentForm(new IntroForm());
+        }
+
+    }
+
+    public class SplashForm extends Form {
+
+        public SplashForm() {
+            super();
+            setLayout(new BorderLayout());
+
+            try {
+                addComponent(BorderLayout.CENTER, new Label(Image.createImage("/icon.png")) {{
+                    getStyle().setAlignment(Container.CENTER);
+                }});
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 
     public class IntroForm extends Form {
@@ -53,7 +75,6 @@ public class LaunchActivity extends BaseActivity {
 
             addComponent(new Container(new BoxLayout(BoxLayout.Y_AXIS)) {{
                 getStyle().setPadding(0, 0, 32, 32);
-                getStyle().setBgColor(0x000000);
 
                 addComponent(new ColoredButton("Start Messaging", new ActionListener() {
                     public void actionPerformed(ActionEvent evt) {
@@ -74,22 +95,39 @@ public class LaunchActivity extends BaseActivity {
 
     private void connectServer() {
 
-        loadingShow("Connecting to server...");
+        if (!ConnectionsManager.getInstance().isConnected()) {
+            loadingShow("Connecting to server...");
 
-        new Thread() {
-            public void run() {
-                try {
+            new Thread() {
+                public void run() {
                     try {
-                        ConnectionsManager.getInstance().connect();
-                        loadingFinish("Connected", 500L);
-                    } catch (IOException e) {
-                        new Alert(Locale.getCurrent().appName);
-                        loadingFinish(LogUtil.formatError(e), 3000L);
+                        try {
+                            ConnectionsManager.getInstance().connect();
+                            loadingStop("Connected", 500L);
+                            loadingShow("Loading...");
+                            Thread.sleep(100L);
+                            ConnectionsManager.getInstance().processUpdates();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            loadingStop(LogUtil.formatError(e), 3000L);
+                            // TODO: SetProxy
+                        }
+                    } catch (InterruptedException ignored) {
                     }
-                } catch (InterruptedException ignored) {
                 }
-            }
-        }.start();
+            }.start();
+        }
+    }
+
+    public void updateAuthorizationState(TMApi.AuthorizationState state) {
+
+        if (state instanceof TMApi.AuthorizationStateWaitPhoneNumber) {
+            loadingCancel();
+
+            performActivity(new LoginActivity());
+        }
 
     }
+
+
 }

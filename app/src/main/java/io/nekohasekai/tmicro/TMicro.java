@@ -1,12 +1,17 @@
 package io.nekohasekai.tmicro;
 
 import com.sun.lwuit.Display;
+import com.sun.lwuit.plaf.DefaultLookAndFeel;
+import com.sun.lwuit.plaf.LookAndFeel;
+import com.sun.lwuit.plaf.UIManager;
 import io.nekohasekai.tmicro.messenger.ConnectionsManager;
 import io.nekohasekai.tmicro.ui.BaseActivity;
 import io.nekohasekai.tmicro.ui.LaunchActivity;
+import io.nekohasekai.tmicro.utils.FileUtil;
 import io.nekohasekai.tmicro.utils.LogUtil;
 import io.nekohasekai.tmicro.utils.ResUtil;
 import j2me.util.HashMap;
+import j2me.util.LinkedList;
 
 import javax.microedition.io.Connector;
 import javax.microedition.midlet.MIDlet;
@@ -23,8 +28,18 @@ public class TMicro extends MIDlet {
     public static TMicro application;
 
     public BaseActivity contentActivity;
+    public LinkedList listeners;
+
+    public TMicro() {
+        listeners = new LinkedList();
+    }
 
     public void setContentActivity(BaseActivity activity) {
+        if (contentActivity != null) {
+            contentActivity.onStop();
+            contentActivity = null;
+        }
+
         contentActivity = activity;
         contentActivity.onCreate();
     }
@@ -43,11 +58,13 @@ public class TMicro extends MIDlet {
 
             try {
                 Connector.open("socket://localhost");
+                FileUtil.getFile("non-exists-file").close();
             } catch (SecurityException e) {
-                notifyDestroyed();
+                TMicro.application.notifyDestroyed();
                 return;
             } catch (Exception ignored) {
             }
+
             setContentActivity(new LaunchActivity());
         } else if (contentActivity != null) {
             LogUtil.info("Resume app");
@@ -67,8 +84,6 @@ public class TMicro extends MIDlet {
     }
 
     protected void destroyApp(boolean unconditional) throws MIDletStateChangeException {
-        LogUtil.info("Destroy app, unconditional=" + unconditional);
-
         ConnectionsManager.getInstance().disconnect();
 
         if (contentActivity != null) {

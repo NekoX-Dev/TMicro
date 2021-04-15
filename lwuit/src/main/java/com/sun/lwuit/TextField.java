@@ -217,11 +217,15 @@ public class TextField extends TextArea {
         "WXYZ9",
     };
 
+    public TextField() {
+        this(TextArea.ANY);
+    }
+
     /**
      * Default constructor
      */
-    public TextField() {
-        super(1, 20);
+    public TextField(int constraint) {
+        super(1, 20, constraint);
         setUIID("TextField");
         setSingleLineTextArea(true);
     }
@@ -231,8 +235,8 @@ public class TextField extends TextArea {
      * 
      * @param columns - the number of columns
      */
-    public TextField(int columns) {
-        super(1, columns);
+    public TextField(int columns, int constraint) {
+        super(1, columns, constraint);
         setUIID("TextField");
         setSingleLineTextArea(true);
     }

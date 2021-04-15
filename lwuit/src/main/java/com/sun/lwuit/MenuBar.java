@@ -286,7 +286,7 @@ public class MenuBar extends Container implements ActionListener {
         return clearCommand;
     }
     
-    private Button findCommandComponent(Command c) {
+    public Button findCommandComponent(Command c) {
         Button b = findCommandComponent(c, this);
         if(b == null) {
             return findCommandComponent(c, parent.getTitleArea());
@@ -609,6 +609,7 @@ public class MenuBar extends Container implements ActionListener {
             b.getStyle().setMargin(0, 0, 0, 0);
             b.getStyle().setPadding(0, 0, 0, 0);
         }
+        b.getStyle().setFgColor(0xffffff);
     }
 
     /**
@@ -1038,7 +1039,7 @@ public class MenuBar extends Container implements ActionListener {
      * 
      * @param cmd Command to remove
      */
-    protected void removeCommand(Command cmd) {
+    public void removeCommand(Command cmd) {
         int behavior = getCommandBehavior();
         if(behavior == Display.COMMAND_BEHAVIOR_BUTTON_BAR || 
                 behavior == Display.COMMAND_BEHAVIOR_BUTTON_BAR_TITLE_BACK ||

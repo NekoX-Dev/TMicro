@@ -4,7 +4,7 @@ import com.googlecode.compress_j2me.gzip.Gzip;
 import io.nekohasekai.tmicro.TMicro;
 import io.nekohasekai.tmicro.tmnet.SerializedData;
 import io.nekohasekai.tmicro.tmnet.TMApi;
-import io.nekohasekai.tmicro.tmnet.TMClassStore;
+import io.nekohasekai.tmicro.tmnet.TMStore;
 import io.nekohasekai.tmicro.utils.EncUtil;
 import io.nekohasekai.tmicro.utils.IoUtil;
 import io.nekohasekai.tmicro.utils.LogUtil;
@@ -15,6 +15,8 @@ import io.nekohasekai.wsm.WebSocketClient;
 import io.nekohasekai.wsm.WebSocketListener;
 import j2me.lang.IllegalStateException;
 import j2me.util.HashMap;
+import j2me.util.Iterator;
+import j2me.util.LinkedList;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.util.encoders.Base64;
@@ -162,6 +164,10 @@ public class ConnectionsManager extends WebSocketListener {
         if (socket != null) socket.cancel();
     }
 
+    public boolean isConnected() {
+        return socket != null && socket.isActive();
+    }
+
     protected void onPing(final WebSocket socket, final byte[] payload) {
         try {
             socket.pong(payload);
@@ -184,7 +190,7 @@ public class ConnectionsManager extends WebSocketListener {
                 message = gzOut.toByteArray();
             }
             message = chaChaSession.readMessage(message);
-            TMApi.Object update = TMClassStore.deserializeFromSteam(new SerializedData(message), true);
+            TMApi.Object update = TMStore.deserializeFromSteam(new SerializedData(message), true);
             processUpdate(update);
         } catch (IOException e) {
             e.printStackTrace();
@@ -230,24 +236,20 @@ public class ConnectionsManager extends WebSocketListener {
 
         SerializedData data = new SerializedData();
 
-        if (callback == null) {
-            TMClassStore.serializeToStream(data, request);
-        } else {
-            TMApi.RpcRequest requestWithId = new TMApi.RpcRequest();
+        if (callback != null) {
             synchronized (this) {
-                requestWithId.requestId = requestId++;
+                request.requestId = requestId++;
             }
-            callbacks.put(new Integer(requestWithId.requestId), callback);
-            requestWithId.request = request;
-            TMClassStore.serializeToStream(data, requestWithId);
+            callbacks.put(new Integer(request.requestId), callback);
         }
 
+        TMStore.serializeToStream(data, request);
         sendRaw(data.toByteArray());
     }
 
-    private void processUpdate(TMApi.Object update) {
-        if (update instanceof TMApi.RpcResponse) {
-            TMApi.RpcResponse response = (TMApi.RpcResponse) update;
+    private void processUpdate(TMApi.Object object) {
+        if (object instanceof TMApi.Response) {
+            TMApi.Response response = (TMApi.Response) object;
             if (TMicro.DEBUG) {
                 LogUtil.info("Java received " + LogUtil.getClassName(response.response));
             }
@@ -262,10 +264,38 @@ public class ConnectionsManager extends WebSocketListener {
             } else {
                 callback.onSuccess(response.response);
             }
+        } else if (object instanceof TMApi.Update) {
+            TMApi.Update update = (TMApi.Update) object;
+            if (TMicro.DEBUG) {
+                LogUtil.info("Java received update " + LogUtil.getClassName(update));
+            }
+            processUpdate(update);
         } else {
             if (TMicro.DEBUG) {
-                LogUtil.info("Java received unknown " + LogUtil.getClassName(update));
+                LogUtil.info("Java received unknown " + LogUtil.getClassName(object));
             }
+        }
+    }
+
+    private transient boolean sendEvent;
+    private final LinkedList updates = new LinkedList();
+
+    private void processUpdate(TMApi.Update object) {
+        if (!sendEvent) {
+            updates.add(object);
+        } else if (object instanceof TMApi.UpdateAuthorizationState) {
+            TMApi.UpdateAuthorizationState update = (TMApi.UpdateAuthorizationState) object;
+            Iterator iter = TMicro.application.listeners.iterator();
+            while (iter.hasNext()) ((TMListener) iter.next())
+                    .updateAuthorizationState(update.state);
+        }
+    }
+
+    public void processUpdates() {
+        sendEvent = true;
+        Iterator iter = updates.iterator();
+        while (iter.hasNext()) {
+            processUpdate((TMApi.Update) iter.next());
         }
     }
 

@@ -458,7 +458,7 @@ public class DefaultLookAndFeel extends LookAndFeel implements FocusListener {
         if (comboImage != null) {
             g.drawImage(comboImage, x, y + height / 2 - comboImage.getHeight() / 2);
         } else {
-            int color = g.getColor();
+           /* int color = g.getColor();
 
             // brighten or darken the color slightly
             int destColor = findDestColor(color);
@@ -486,7 +486,7 @@ public class DefaultLookAndFeel extends LookAndFeel implements FocusListener {
             //g.setColor(style.getFgColor());
             //g.fillTriangle(x1 + 2, y1 + 2, x2, y2 - 2, x3 - 2, y3 + 2);
 
-            g.translate(-x, -y);
+            g.translate(-x, -y);*/
         }
 
     }

@@ -4,6 +4,7 @@ import com.sun.lwuit.Container;
 import com.sun.lwuit.Form;
 import com.sun.lwuit.layouts.BoxLayout;
 import io.nekohasekai.tmicro.Locale;
+import io.nekohasekai.tmicro.Theme;
 import io.nekohasekai.tmicro.utils.ThreadUtil;
 
 public class LoadForm extends Form {
@@ -11,16 +12,11 @@ public class LoadForm extends Form {
     public TextView textView;
     public String message;
     public LoadingThread thread;
+    public transient boolean start;
 
     public LoadForm(String text) {
         message = text;
-
-        setTitle(Locale.getCurrent().appName);
-        getTitleStyle().setFgColor(0xffffff);
-        getTitleStyle().setBgColor(0x448aff);
-        getTitleStyle().setPadding(Container.LEFT, 8);
-        getTitleStyle().setAlignment(Container.LEFT);
-
+        Theme.applyTitleBar(this);
         setLayout(new BoxLayout(BoxLayout.Y_AXIS));
         addComponent(new Container(new BoxLayout(BoxLayout.Y_AXIS)) {{
             getStyle().setMargin(8, 8, 8, 8);
@@ -32,11 +28,13 @@ public class LoadForm extends Form {
 
     public void start() {
         stop();
+        start = true;
         thread = new LoadingThread();
         thread.start();
     }
 
     public void stop() {
+        start = false;
         if (thread != null) {
             thread.interrupt();
             thread = null;
@@ -44,7 +42,15 @@ public class LoadForm extends Form {
     }
 
     public void finish(final String message) throws InterruptedException {
+        cancel();
+        ThreadUtil.runOnUiThread(new Runnable() {
+            public void run() {
+                textView.setText(message);
+            }
+        });
+    }
 
+    public void cancel() {
         if (thread != null) {
             thread.interrupt();
             try {
@@ -53,12 +59,7 @@ public class LoadForm extends Form {
                 e.printStackTrace();
             }
         }
-        ThreadUtil.runOnUiThread(new Runnable() {
-            public void run() {
-                textView.setText(message);
-            }
-        });
-
+        thread = null;
     }
 
     public class LoadingThread extends Thread {
@@ -70,7 +71,7 @@ public class LoadForm extends Form {
         }
 
         public void run() {
-            while (isAlive()) {
+            while (isAlive() && start) {
                 String string = message + "    ";
                 if (step == 0) {
                     string += "/";

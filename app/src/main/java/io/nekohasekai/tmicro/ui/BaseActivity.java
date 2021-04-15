@@ -1,10 +1,12 @@
 package io.nekohasekai.tmicro.ui;
 
 import com.sun.lwuit.Form;
+import io.nekohasekai.tmicro.TMicro;
+import io.nekohasekai.tmicro.messenger.TMListener;
 import io.nekohasekai.tmicro.utils.LogUtil;
 import io.nekohasekai.tmicro.utils.ui.LoadForm;
 
-public class BaseActivity {
+public class BaseActivity extends TMListener {
 
     public Form contentForm;
     public LoadForm loadingForm;
@@ -15,6 +17,11 @@ public class BaseActivity {
     }
 
     public void onCreate() {
+        TMicro.application.listeners.add(this);
+    }
+
+    public void onStop() {
+        TMicro.application.listeners.remove(this);
     }
 
     public void onPause() {
@@ -48,6 +55,22 @@ public class BaseActivity {
         loadingForm.message = message;
     }
 
+    public void loadingCancel() {
+        if (loadingForm == null) return;
+        loadingForm.cancel();
+        loadingForm = null;
+    }
+
+    public void loadingStop(String message, long delay) throws InterruptedException {
+        if (loadingForm == null) {
+            LogUtil.warn("Loading form not exists!");
+            return;
+        }
+        loadingForm.finish(message);
+        Thread.sleep(delay);
+        loadingForm = null;
+    }
+
     public void loadingFinish(String message, long delay) throws InterruptedException {
         if (loadingForm == null) {
             LogUtil.warn("Loading form not exists!");
@@ -63,6 +86,10 @@ public class BaseActivity {
     }
 
     public void onDisconnected(String error) {
+    }
+
+    public void performActivity(BaseActivity activity) {
+        TMicro.application.setContentActivity(activity);
     }
 
 }
