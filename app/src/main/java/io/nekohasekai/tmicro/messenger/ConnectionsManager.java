@@ -1,7 +1,6 @@
 package io.nekohasekai.tmicro.messenger;
 
 import com.googlecode.compress_j2me.gzip.Gzip;
-import com.jcraft.jzlib.JZlib;
 import io.nekohasekai.tmicro.TMicro;
 import io.nekohasekai.tmicro.tmnet.SerializedData;
 import io.nekohasekai.tmicro.tmnet.TMApi;
@@ -108,13 +107,14 @@ public class ConnectionsManager extends WebSocketListener {
             throw new IOException("Already connected");
         }
 
+        int time = (int) (System.currentTimeMillis() / 1000);
         byte[] key = EncUtil.mkChaChaKey();
-        chaChaSession = new EncUtil.ChaChaSession(key);
+        chaChaSession = new EncUtil.ChaChaSession(key, time);
 
         HashMap headers = new HashMap();
         SerializedData data = new SerializedData();
         data.writeByteArray(key);
-        data.writeInt32((int) (System.currentTimeMillis() / 1000));
+        data.writeInt32(time);
         String authorization = Base64.toBase64String(EncUtil.publicEncode(data.toByteArray()));
         headers.put("Authorization", "Basic " + authorization);
 

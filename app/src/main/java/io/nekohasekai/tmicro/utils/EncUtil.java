@@ -5,7 +5,6 @@ import j2me.security.SecureRandom;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.ec.CustomNamedCurves;
 import org.bouncycastle.crypto.engines.SM2Engine;
@@ -15,7 +14,6 @@ import org.bouncycastle.crypto.params.*;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.math.ec.FixedPointCombMultiplier;
 import org.bouncycastle.util.Arrays;
-import org.bouncycastle.util.encoders.Base64;
 
 import java.io.IOException;
 
@@ -98,13 +96,15 @@ public class EncUtil {
     public static class ChaChaSession {
 
         private final byte[] key;
+        private final int time;
         private final SecureRandom nonceIn;
         private final SecureRandom nonceOut;
         public boolean isServer = false;
         private final ChaCha20Poly1305 cipher = new ChaCha20Poly1305();
 
-        public ChaChaSession(byte[] key) {
+        public ChaChaSession(byte[] key, int time) {
             this.key = key;
+            this.time = time;
             this.nonceIn = new SecureRandom(genSeed(false));
             this.nonceOut = new SecureRandom(genSeed(true));
         }
@@ -114,9 +114,9 @@ public class EncUtil {
          */
         private byte[] genSeed(boolean output) {
             if (output ^ isServer) {
-                return Arrays.append(key, (byte) 0);
+                return Arrays.concatenate(key, BigInteger.valueOf(time).toByteArray(), new byte[]{0});
             } else {
-                return Arrays.append(key, (byte) 1);
+                return Arrays.concatenate(key, BigInteger.valueOf(time).toByteArray(), new byte[]{1});
             }
         }
 
