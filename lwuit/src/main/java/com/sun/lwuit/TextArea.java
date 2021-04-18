@@ -30,12 +30,13 @@ import com.sun.lwuit.geom.Rectangle;
 import com.sun.lwuit.plaf.LookAndFeel;
 import com.sun.lwuit.plaf.Style;
 import com.sun.lwuit.plaf.UIManager;
+
 import java.util.Vector;
 
 /**
  * An optionally multi-line editable region that can display text and allow a user to edit it.
  * Depending on the platform editing might occur in a new screen. Notice that when creating
- * a text area with one row it will act as a text field and never grow beyond that, however 
+ * a text area with one row it will act as a text field and never grow beyond that, however
  * when assigning a greater number of rows the text area becomes multi-line with a minimum
  * number of visible rows, the text area will grow based on its content.
  *
@@ -46,6 +47,7 @@ public class TextArea extends Component {
 
     /**
      * Indicates the defaut vertical alignment for a text field, only applies to single line text fields
+     *
      * @return the defaultValign
      */
     public static int getDefaultValign() {
@@ -54,6 +56,7 @@ public class TextArea extends Component {
 
     /**
      * Indicates the defaut vertical alignment for a text field, only applies to single line text fields
+     *
      * @param aDefaultValign the defaultValign to set
      */
     public static void setDefaultValign(int aDefaultValign) {
@@ -62,7 +65,7 @@ public class TextArea extends Component {
 
     private int valign = defaultValign;
 
-    private static int defaultMaxSize = 124;
+    public static int defaultMaxSize = 124;
     private static boolean autoDegradeMaxSize = false;
     private static boolean hadSuccessfulEdit = false;
 
@@ -75,7 +78,7 @@ public class TextArea extends Component {
     private static final char ENTER_KEY = '\n';
 
     /**
-     * Unsupported characters is a string that contains characters that cause issues 
+     * Unsupported characters is a string that contains characters that cause issues
      * when rendering on some problematic fonts. The rendering engine can thus remove them
      * when drawing.
      */
@@ -117,67 +120,67 @@ public class TextArea extends Component {
     public static final int URL = 4;
 
     /**
-     * The user is allowed to enter numeric values with optional decimal 
+     * The user is allowed to enter numeric values with optional decimal
      * fractions, for example "-123", "0.123", or ".5".
      */
     public static final int DECIMAL = 5;
-    
+
     /**
-     * Indicates that the text entered is confidential data that should be 
+     * Indicates that the text entered is confidential data that should be
      * obscured whenever possible.
      */
     public static final int PASSWORD = 0x10000;
 
     /**
-     *  Indicates that editing is currently disallowed.
+     * Indicates that editing is currently disallowed.
      */
     public static final int UNEDITABLE = 0x20000;
 
     /**
-     * Indicates that the text entered is sensitive data that the 
-     * implementation must never store into a dictionary or table for use 
+     * Indicates that the text entered is sensitive data that the
+     * implementation must never store into a dictionary or table for use
      * in predictive, auto-completing, or other accelerated input schemes.
      */
     public static final int SENSITIVE = 0x40000;
 
     /**
-     * Indicates that the text entered does not consist of words that are 
-     * likely to be found in dictionaries typically used by predictive input 
+     * Indicates that the text entered does not consist of words that are
+     * likely to be found in dictionaries typically used by predictive input
      * schemes.
      */
-    public static final int NON_PREDICTIVE= 0x80000;
+    public static final int NON_PREDICTIVE = 0x80000;
 
     /**
-     * This flag is a hint to the implementation that during text editing, 
+     * This flag is a hint to the implementation that during text editing,
      * the initial letter of each word should be capitalized.
      */
     public static final int INITIAL_CAPS_WORD = 0x100000;
 
     /**
-     * This flag is a hint to the implementation that during text editing, 
+     * This flag is a hint to the implementation that during text editing,
      * the initial letter of each sentence should be capitalized.
      */
     public static final int INITIAL_CAPS_SENTENCE = 0x200000;
     //private int modifierFlag = 0x00000;
-             
+
     /**
      * Input constraint which should be one of ANY, NUMERIC,
      * PHONENUMBER, URL or EMAIL
      */
     private int constraint = ANY;
-    
-    private  String text="";
-    
-    private  boolean editable = true;
-    
-    private int maxSize = defaultMaxSize ; //maximum size (number of characters) that can be stored in this TextField.
-    
+
+    private String text = "";
+
+    private boolean editable = true;
+
+    private int maxSize = defaultMaxSize; //maximum size (number of characters) that can be stored in this TextField.
+
     private int rows = 1;
-    
+
     private int columns = 3;
-    
+
     // problematic  maxSize = 20; //maximum size (number of characters) that can be stored in this TextField.
-    
+
     private Vector rowStrings;
     private int widthForRowCalculations = -1;
 
@@ -186,7 +189,7 @@ public class TextArea extends Component {
     private boolean triggerClose;
 
     private Vector actionListeners = null;
-    
+
     /**
      * Indicates that the text area should "grow" in height based on the content beyond the
      * limits indicate by the rows variable
@@ -207,81 +210,81 @@ public class TextArea extends Component {
     private boolean singleLineTextArea;
 
     private int currentRowWidth;
-    
+
     private Label hintLabel;
 
     /**
      * Creates an area with the given rows and columns
-     * 
-     * @param rows the number of rows
+     *
+     * @param rows    the number of rows
      * @param columns - the number of columns
      * @throws IllegalArgumentException if rows <= 0 or columns <= 1
      */
-    public TextArea(int rows, int columns){
+    public TextArea(int rows, int columns) {
         this("", defaultMaxSize, rows, columns, ANY);
     }
 
     /**
-     * Creates an area with the given rows, columns and constraint 
-     * 
-     * @param rows the number of rows
-     * @param columns - the number of columns
+     * Creates an area with the given rows, columns and constraint
+     *
+     * @param rows       the number of rows
+     * @param columns    - the number of columns
      * @param constraint one of ANY, EMAILADDR, NUMERIC, PHONENUMBER, URL, DECIMAL
-     * it can be bitwised or'd with one of PASSWORD, UNEDITABLE, SENSITIVE, NON_PREDICTIVE,
-     * INITIAL_CAPS_SENTENCE, INITIAL_CAPS_WORD. E.g. ANY | PASSWORD.
+     *                   it can be bitwised or'd with one of PASSWORD, UNEDITABLE, SENSITIVE, NON_PREDICTIVE,
+     *                   INITIAL_CAPS_SENTENCE, INITIAL_CAPS_WORD. E.g. ANY | PASSWORD.
      * @throws IllegalArgumentException if rows <= 0 or columns <= 1
      */
-    public TextArea(int rows, int columns, int constraint){
+    public TextArea(int rows, int columns, int constraint) {
         this("", defaultMaxSize, rows, columns, constraint);
-    }
-    
-    /**
-     * Creates an area with the given text, rows and columns
-     * 
-     * @param text the text to be displayed; if text is null, the empty 
-     * string "" will be displayed
-     * @param rows the number of rows
-     * @param columns - the number of columns
-     * @throws IllegalArgumentException if rows <= 0 or columns <= 1
-     */
-    public TextArea(String text, int rows, int columns){
-        this(text,defaultMaxSize, rows, columns, ANY); //String , maxSize, constraints= 0 (ANY)
     }
 
     /**
-     * Creates an area with the given text, rows, columns and constraint 
-     * 
-     * @param text the text to be displayed; if text is null, the empty 
-     * string "" will be displayed
-     * @param rows the number of rows
+     * Creates an area with the given text, rows and columns
+     *
+     * @param text    the text to be displayed; if text is null, the empty
+     *                string "" will be displayed
+     * @param rows    the number of rows
      * @param columns - the number of columns
-     * @param constraint one of ANY, EMAILADDR, NUMERIC, PHONENUMBER, URL, DECIMAL
-     * it can be bitwised or'd with one of PASSWORD, UNEDITABLE, SENSITIVE, NON_PREDICTIVE,
-     * INITIAL_CAPS_SENTENCE, INITIAL_CAPS_WORD. E.g. ANY | PASSWORD.
      * @throws IllegalArgumentException if rows <= 0 or columns <= 1
      */
-    public TextArea(String text, int rows, int columns, int constraint){
-        this(text,defaultMaxSize, rows, columns, constraint); 
+    public TextArea(String text, int rows, int columns) {
+        this(text, defaultMaxSize, rows, columns, ANY); //String , maxSize, constraints= 0 (ANY)
+    }
+
+    /**
+     * Creates an area with the given text, rows, columns and constraint
+     *
+     * @param text       the text to be displayed; if text is null, the empty
+     *                   string "" will be displayed
+     * @param rows       the number of rows
+     * @param columns    - the number of columns
+     * @param constraint one of ANY, EMAILADDR, NUMERIC, PHONENUMBER, URL, DECIMAL
+     *                   it can be bitwised or'd with one of PASSWORD, UNEDITABLE, SENSITIVE, NON_PREDICTIVE,
+     *                   INITIAL_CAPS_SENTENCE, INITIAL_CAPS_WORD. E.g. ANY | PASSWORD.
+     * @throws IllegalArgumentException if rows <= 0 or columns <= 1
+     */
+    public TextArea(String text, int rows, int columns, int constraint) {
+        this(text, defaultMaxSize, rows, columns, constraint);
     }
 
     /**
      * Creates an area with the given text and maximum size, this constructor
-     * will create a single line text area similar to a text field! 
-     * 
-     * @param text the text to be displayed; if text is null, the empty 
-     * string "" will be displayed
+     * will create a single line text area similar to a text field!
+     *
+     * @param text    the text to be displayed; if text is null, the empty
+     *                string "" will be displayed
      * @param maxSize text area maximum size
      */
-    public TextArea(String text, int maxSize){
-        this(text,maxSize, 1, 3, ANY);
+    public TextArea(String text, int maxSize) {
+        this(text, maxSize, 1, 3, ANY);
     }
-    
+
     /**
      * Creates an area with the given text, this constructor
-     * will create a single line text area similar to a text field! 
-     * 
-     * @param text the text to be displayed; if text is null, the empty 
-     * string "" will be displayed
+     * will create a single line text area similar to a text field!
+     *
+     * @param text the text to be displayed; if text is null, the empty
+     *             string "" will be displayed
      */
     public TextArea(String text) {
         this(text, Math.max(defaultMaxSize, text.length()), 1, 3, ANY);
@@ -289,35 +292,35 @@ public class TextArea extends Component {
 
     /**
      * Creates an empty text area, this constructor
-     * will create a single line text area similar to a text field! 
+     * will create a single line text area similar to a text field!
      */
     public TextArea() {
         this("");
     }
-    
+
     /**
-     * Creates an area with the given text, maximum size, rows, columns and constraint 
-     * 
-     * @param text the text to be displayed; if text is null, the empty 
-     * string "" will be displayed
-     * @param maxSize text area maximum size
-     * @param rows the number of rows
-     * @param columns - the number of columns
+     * Creates an area with the given text, maximum size, rows, columns and constraint
+     *
+     * @param text       the text to be displayed; if text is null, the empty
+     *                   string "" will be displayed
+     * @param maxSize    text area maximum size
+     * @param rows       the number of rows
+     * @param columns    - the number of columns
      * @param constraint one of ANY, EMAILADDR, NUMERIC, PHONENUMBER, URL, DECIMAL
-     * it can be bitwised or'd with one of PASSWORD, UNEDITABLE, SENSITIVE, NON_PREDICTIVE,
-     * INITIAL_CAPS_SENTENCE, INITIAL_CAPS_WORD. E.g. ANY | PASSWORD.
+     *                   it can be bitwised or'd with one of PASSWORD, UNEDITABLE, SENSITIVE, NON_PREDICTIVE,
+     *                   INITIAL_CAPS_SENTENCE, INITIAL_CAPS_WORD. E.g. ANY | PASSWORD.
      * @throws IllegalArgumentException if rows <= 0 or columns <= 1
      */
-    private TextArea(String text, int maxSize, int rows, int columns, int constraint){
+    private TextArea(String text, int maxSize, int rows, int columns, int constraint) {
         setUIID("TextArea");
         setSelectCommandText(UIManager.getInstance().localize("edit", "Edit"));
         this.maxSize = maxSize;
         setText(text);
         setConstraint(constraint);
-        if(rows <= 0){
+        if (rows <= 0) {
             throw new IllegalArgumentException("rows must be positive");
         }
-        if(columns <= 1 && rows != 1){
+        if (columns <= 1 && rows != 1) {
             throw new IllegalArgumentException("columns must be larger than 1");
         }
         this.rows = rows;
@@ -327,11 +330,11 @@ public class TextArea extends Component {
     }
 
     /**
-     * Sets the constraint 
-     * 
+     * Sets the constraint
+     *
      * @param constraint one of ANY, EMAILADDR, NUMERIC, PHONENUMBER, URL, DECIMAL
-     * it can be bitwised or'd with one of PASSWORD, UNEDITABLE, SENSITIVE, NON_PREDICTIVE,
-     * INITIAL_CAPS_SENTENCE, INITIAL_CAPS_WORD. E.g. ANY | PASSWORD.
+     *                   it can be bitwised or'd with one of PASSWORD, UNEDITABLE, SENSITIVE, NON_PREDICTIVE,
+     *                   INITIAL_CAPS_SENTENCE, INITIAL_CAPS_WORD. E.g. ANY | PASSWORD.
      */
     public void setConstraint(int constraint) {
         this.constraint = constraint;
@@ -340,7 +343,7 @@ public class TextArea extends Component {
 
     /**
      * Returns the editing constraint value
-     * 
+     *
      * @return the editing constraint value
      * @see #setConstraint
      */
@@ -356,38 +359,38 @@ public class TextArea extends Component {
         getRowStrings();
     }
 
-    
+
     /**
      * Sets the text within this text area
-     * 
+     *
      * @param t new value for the text area
      */
     public void setText(String t) {
         this.text = (t != null) ? t : "";
         setShouldCalcPreferredSize(true);
-        if(maxSize < text.length()) {
+        if (maxSize < text.length()) {
             maxSize = text.length() + 1;
         }
-        
-        synchronized(this) {
+
+        synchronized (this) {
             //zero the vector inorder to initialize it on the next paint
-            rowStrings=null; 
+            rowStrings = null;
         }
         repaint();
     }
 
     /**
      * Returns the text in the text area
-     * 
+     *
      * @return the text in the text area
      */
     public String getText() {
         return text;
     }
-    
+
     /**
      * Returns true if this area is editable
-     * 
+     *
      * @return true if this area is editable
      */
     public boolean isEditable() {
@@ -396,7 +399,7 @@ public class TextArea extends Component {
 
     /**
      * Sets this text area to be editable or readonly
-     * 
+     *
      * @param b true is text are is editable; otherwise false
      */
     public void setEditable(boolean b) {
@@ -405,7 +408,7 @@ public class TextArea extends Component {
 
     /**
      * Returns the maximum size for the text area
-     * 
+     *
      * @return the maximum size for the text area
      */
     public int getMaxSize() {
@@ -414,19 +417,19 @@ public class TextArea extends Component {
 
     /**
      * Sets the maximum size of the text area
-     * 
+     *
      * @param maxSize the maximum size of the text area
      */
     public void setMaxSize(int maxSize) {
         this.maxSize = maxSize;
     }
-    
+
     /**
      * @inheritDoc
      */
     public void keyPressed(int keyCode) {
         super.keyPressed(keyCode);
-        
+
         int action = com.sun.lwuit.Display.getInstance().getGameAction(keyCode);
 
         // this works around a bug where fire is also a softkey on devices such as newer Nokia
@@ -439,16 +442,16 @@ public class TextArea extends Component {
         //scroll the TextArea
         Rectangle rect = new Rectangle(getScrollX(), getScrollY(), getWidth(), getHeight());
         Font textFont = getStyle().getFont();
-        if(action == Display.GAME_DOWN){
-            if((getScrollY() + getHeight()) <(rowsGap + getStyle().getFont().getHeight()) * getLines()) {
+        if (action == Display.GAME_DOWN) {
+            if ((getScrollY() + getHeight()) < (rowsGap + getStyle().getFont().getHeight()) * getLines()) {
                 rect.setY(rect.getY() + (textFont.getHeight() + rowsGap) * linesToScroll);
                 scrollRectToVisible(rect, this);
             } else {
                 setHandlesInput(false);
             }
         } else {
-            if(action == Display.GAME_UP){
-                if(getScrollY() > 0) {
+            if (action == Display.GAME_UP) {
+                if (getScrollY() > 0) {
                     rect.setY(Math.max(0, rect.getY() - (textFont.getHeight() + rowsGap) * linesToScroll));
                     scrollRectToVisible(rect, this);
                 } else {
@@ -456,19 +459,19 @@ public class TextArea extends Component {
                 }
             }
         }
-        if(action == Display.GAME_RIGHT || action == Display.GAME_LEFT){
+        if (action == Display.GAME_RIGHT || action == Display.GAME_LEFT) {
             setHandlesInput(false);
         }
     }
-    
-    
+
+
     /**
      * @inheritDoc
      */
     protected void fireClicked() {
         onClick();
     }
-    
+
     /**
      * @inheritDoc
      */
@@ -481,7 +484,7 @@ public class TextArea extends Component {
      */
     public void keyReleased(int keyCode) {
         int action = com.sun.lwuit.Display.getInstance().getGameAction(keyCode);
-        if(isEditable()){
+        if (isEditable()) {
             // this works around a bug where fire is also a softkey on devices such as newer Nokia
             // series 40's
             if (triggerClose && (action == Display.GAME_FIRE || isEnterKey(keyCode))) {
@@ -489,12 +492,12 @@ public class TextArea extends Component {
                 onClick();
                 return;
             }
-            if(action == 0 && keyCode > 0) {
+            if (action == 0 && keyCode > 0) {
                 Display.getInstance().editString(this, getMaxSize(), getConstraint(), getText(), keyCode);
             }
         }
     }
-    
+
     /**
      * @inheritDoc
      */
@@ -502,18 +505,18 @@ public class TextArea extends Component {
         return isFocusable() && getScrollDimension().getHeight() > getHeight();
     }
 
-        
-    void onClick(){
-        if(isEditable()) {
+
+    void onClick() {
+        if (isEditable()) {
             editString();
         }
     }
-        
-    void editString() {
-        if(autoDegradeMaxSize && (!hadSuccessfulEdit) && (maxSize > 1024)) {
+
+    protected void editString() {
+        if (autoDegradeMaxSize && (!hadSuccessfulEdit) && (maxSize > 1024)) {
             try {
                 Display.getInstance().editString(this, getMaxSize(), getConstraint(), getText());
-            } catch(IllegalArgumentException err) {
+            } catch (IllegalArgumentException err) {
                 maxSize -= 1024;
                 setDefaultMaxSize(maxSize);
                 editString();
@@ -536,7 +539,7 @@ public class TextArea extends Component {
     public void pointerHoverReleased(int[] x, int[] y) {
         requestFocus();
     }
-    
+
     /**
      * @inheritDoc
      */
@@ -574,117 +577,117 @@ public class TextArea extends Component {
         super.focusLostInternal();
         setHandlesInput(false);
     }
-    
+
     /**
      * Returns the number of columns in the text area
-     * 
+     *
      * @return the number of columns in the text area
      */
     public int getColumns() {
         return columns;
     }
-    
+
     /**
      * Returns the number of actual rows in the text area taking into consideration
      * growsByContent
-     * 
+     *
      * @return the number of rows in the text area
      */
     public int getActualRows() {
-        if(growByContent) {
+        if (growByContent) {
             return Math.max(rows, getLines());
         }
         return rows;
     }
-    
+
     /**
      * Returns the number of rows in the text area
-     * 
+     *
      * @return the number of rows in the text area
      */
     public int getRows() {
         return rows;
     }
-    
+
     /**
      * Sets the number of columns in the text area
-     * 
+     *
      * @param columns number of columns
      */
     public void setColumns(int columns) {
         setShouldCalcPreferredSize(true);
         this.columns = columns;
     }
-    
+
     /**
      * Sets the number of rows in the text area
-     * 
+     *
      * @param rows number of rows
      */
     public void setRows(int rows) {
         setShouldCalcPreferredSize(true);
         this.rows = rows;
     }
-    
+
     void initComponentImpl() {
         getRowStrings();
         super.initComponentImpl();
     }
-    
+
     private Vector getRowStrings() {
-        if(rowStrings == null || widthForRowCalculations != getWidth() - getUnselectedStyle().getPadding(false, RIGHT) - getUnselectedStyle().getPadding(false, LEFT)){
+        if (rowStrings == null || widthForRowCalculations != getWidth() - getUnselectedStyle().getPadding(false, RIGHT) - getUnselectedStyle().getPadding(false, LEFT)) {
             initRowString();
             setShouldCalcPreferredSize(true);
         }
         return rowStrings;
     }
-    
-    
+
+
     /**
      * Returns the number of text lines in the TextArea
-     * 
+     *
      * @return the number of text lines in the TextArea
      */
-    public int getLines(){
+    public int getLines() {
         int retVal;
         Vector v = getRowStrings();
         retVal = v.size();
         return retVal;
     }
-    
+
     /**
      * Returns the text in the given row of the text box
-     * 
+     *
      * @param line the line number in the text box
      * @return the text of the line
      */
-    public String getTextAt(int line){
+    public String getTextAt(int line) {
         Vector rowsV = getRowStrings();
         int size = rowsV.size();
-        if(size == 0){
+        if (size == 0) {
             return "";
         }
-        if(line >= size){
-            return (String)rowsV.elementAt(size-1);        
-        }            
-        return (String)rowsV.elementAt(line);
+        if (line >= size) {
+            return (String) rowsV.elementAt(size - 1);
+        }
+        return (String) rowsV.elementAt(line);
     }
-    
-    private int indexOf(char[] t, char c, int offset, int length) {
-        for(int iter = offset ; iter < t.length && iter < offset+length; iter++) {
-            if(t[iter] == c) {
-                return iter;
-           }
-       }
-       return -1;
-   }
 
-    
+    private int indexOf(char[] t, char c, int offset, int length) {
+        for (int iter = offset; iter < t.length && iter < offset + length; iter++) {
+            if (t[iter] == c) {
+                return iter;
+            }
+        }
+        return -1;
+    }
+
+
     /**
-     * Override this to modify the text for rendering in cases of invalid characters 
+     * Override this to modify the text for rendering in cases of invalid characters
      * for display, this method allows the developer to replace such characters e.g.:
      * replace "\\t" with 4 spaces
-     * 
+     *
      * @param text the text to process
      * @return the given string as a processed char array ready for rendering
      */
@@ -698,7 +701,7 @@ public class TextArea extends Component {
     }
 
     private boolean fastCharWidthCheck(char[] chrs, int off, int length, int width, int charWidth, Font f) {
-        if(length * charWidth < width) {
+        if (length * charWidth < width) {
             return true;
         }
         length = Math.min(chrs.length, length);
@@ -707,29 +710,29 @@ public class TextArea extends Component {
 
     private synchronized void initRowString() {
         Style style = getUnselectedStyle();
-        rowStrings= new Vector();
+        rowStrings = new Vector();
         widthForRowCalculations = getWidth() - style.getPadding(false, RIGHT) - style.getPadding(false, LEFT);
         // single line text area is essentially a text field, we call the method
         // to allow subclasses to override it
-        if ((isSingleLineTextArea()) || (widthForRowCalculations<=0)) {
+        if ((isSingleLineTextArea()) || (widthForRowCalculations <= 0)) {
             rowStrings.addElement(getText());
             return;
         }
-        if(text == null || text.equals("")){
+        if (text == null || text.equals("")) {
             return;
         }
         char[] text = preprocess(getText());
         int rows = this.rows;
-        if(growByContent) {
+        if (growByContent) {
             rows = Math.max(rows, getLines());
         }
-        
+
         Font font = style.getFont();
         int charWidth = font.charWidth(widestChar);
         Style selectedStyle = getSelectedStyle();
-        if(selectedStyle.getFont() != style.getFont()) {
+        if (selectedStyle.getFont() != style.getFont()) {
             int cw = selectedStyle.getFont().charWidth(widestChar);
-            if(cw > charWidth) {
+            if (cw > charWidth) {
                 charWidth = cw;
                 font = selectedStyle.getFont();
             }
@@ -744,20 +747,20 @@ public class TextArea extends Component {
                 textAreaWidth = Math.min(Display.getInstance().getDisplayWidth() - tPadding, columns) * charWidth;
             }
         }*/
-        
+
         int minCharactersInRow = Math.max(1, textAreaWidth / charWidth);
-        int rowIndex=0;
-        int from=0;
-        int to=from+minCharactersInRow;
-        int textLength=text.length;
+        int rowIndex = 0;
+        int from = 0;
+        int to = from + minCharactersInRow;
+        int textLength = text.length;
         String rowText = null;
-        int i,spaceIndex;
-        
+        int i, spaceIndex;
+
         // if there is any possibility of a scrollbar we need to reduce the textArea
         // width to accommodate it
-        if(textLength / minCharactersInRow > Math.max(2, rows)) {
+        if (textLength / minCharactersInRow > Math.max(2, rows)) {
             textAreaWidth -= UIManager.getInstance().getLookAndFeel().getVerticalScrollWidth();
-            textAreaWidth -= charWidth/2;
+            textAreaWidth -= charWidth / 2;
         }
         String unsupported = getUnsupportedChars();
         
@@ -771,37 +774,37 @@ public class TextArea extends Component {
          */
 
         //Don't rely on the fact that short text has no newline character. we always have to parse the text.
-        to = Math.max( Math.min(textLength-1,to), 0 );
-        while(to<textLength) {
-            if(to>textLength){
-                to=textLength;
+        to = Math.max(Math.min(textLength - 1, to), 0);
+        while (to < textLength) {
+            if (to > textLength) {
+                to = textLength;
             }
 
-            spaceIndex=-1;
-            rowText="";
+            spaceIndex = -1;
+            rowText = "";
             int maxLength = to;
 
-            if(useStringWidth) {
+            if (useStringWidth) {
                 // fix for an infinite loop issue: http://forums.java.net/jive/thread.jspa?messageID=482802
                 //currentRowWidth = 0;
                 String currentRow = "";
-                
+
                 // search for "space" character at close as possible to the end of the row
-                for( i=to; i < textLength && fastCharWidthCheck(text, from, i - from + 1, textAreaWidth, charWidth, font) ; i++){
+                for (i = to; i < textLength && fastCharWidthCheck(text, from, i - from + 1, textAreaWidth, charWidth, font); i++) {
                     char c = text[i];
                     /*if(updateRowWidth(c, font) >= textAreaWidth) {
                         break;
                     }*/
-                    currentRow+=c;
-                    if(font.stringWidth(currentRow) >= textAreaWidth) {
+                    currentRow += c;
+                    if (font.stringWidth(currentRow) >= textAreaWidth) {
                         break;
                     }
-                    if(unsupported.indexOf(c) > -1) {
+                    if (unsupported.indexOf(c) > -1) {
                         text[i] = ' ';
                         c = ' ';
                     }
-                    if(c == ' ' || c == '\n') {
-                        spaceIndex=i;
+                    if (c == ' ' || c == '\n') {
+                        spaceIndex = i;
                         // newline has been found. We can end the loop here as the line cannot grow more
                         if (c == '\n')
                             break;
@@ -810,22 +813,22 @@ public class TextArea extends Component {
                 }
             } else {
                 currentRowWidth = 0;
-                if(to != from) {
+                if (to != from) {
                     currentRowWidth = font.charsWidth(text, from, to - from);
                 }
 
                 // search for "space" character at close as possible to the end of the row
-                for( i=to; i < textLength ; i++){
+                for (i = to; i < textLength; i++) {
                     char c = text[i];
-                    if(updateRowWidth(c, font) >= textAreaWidth) {
+                    if (updateRowWidth(c, font) >= textAreaWidth) {
                         break;
                     }
-                    if(unsupported.indexOf(c) > -1) {
+                    if (unsupported.indexOf(c) > -1) {
                         text[i] = ' ';
                         c = ' ';
                     }
-                    if(c == ' ' || c == '\n') {
-                        spaceIndex=i;
+                    if (c == ' ' || c == '\n') {
+                        spaceIndex = i;
                         // newline has been found. We can end the loop here as the line cannot grow more
                         if (c == '\n')
                             break;
@@ -833,47 +836,47 @@ public class TextArea extends Component {
                     maxLength++;
                 }
             }
-            
+
             // if we got to the end of the text use the entire row,
             // also if space is next character (in the next row) we can cut the line
-            if(i == textLength || text[i] == ' ' || text[i] == '\n') {
-                spaceIndex=i;
+            if (i == textLength || text[i] == ' ' || text[i] == '\n') {
+                spaceIndex = i;
             }
 
             // if we found space in the limit width of the row (searched only from minCharactersInRow)
-            if(spaceIndex!=-1){
+            if (spaceIndex != -1) {
                 // make sure that if we have a newline character before the end of the line we should
                 // break there instead
                 int newLine = indexOf(text, '\n', from, spaceIndex - from);
-                if(newLine > -1 && newLine < spaceIndex) {
+                if (newLine > -1 && newLine < spaceIndex) {
                     spaceIndex = newLine;
                 }
 
                 rowText = new String(text, from, spaceIndex - from);
-                from=spaceIndex+1;
+                from = spaceIndex + 1;
 
             } // if there is no space from minCharactersInRow to limit need to search backwards
-            else{
-                for( i=to; spaceIndex==-1 && i>=from ; i--){
+            else {
+                for (i = to; spaceIndex == -1 && i >= from; i--) {
                     char chr = text[i];
-                    if(chr == ' ' || chr == '\n' || chr == '\t') {
-                        spaceIndex=i;
-                        
+                    if (chr == ' ' || chr == '\n' || chr == '\t') {
+                        spaceIndex = i;
+
                         // don't forget to search for line breaks in the
                         // remaining part. otherwise we overlook possible
                         // line breaks!
                         int newLine = indexOf(text, '\n', from, i - from);
-                        if(newLine > -1 && newLine < spaceIndex) {
-                           spaceIndex = newLine;
+                        if (newLine > -1 && newLine < spaceIndex) {
+                            spaceIndex = newLine;
                         }
                         rowText = new String(text, from, spaceIndex - from);
-                        from=spaceIndex+1;
+                        from = spaceIndex + 1;
                     }
 
                 }
-                if(spaceIndex==-1) {
+                if (spaceIndex == -1) {
                     // from = to + 1;
-                    if(maxLength <= 0) {
+                    if (maxLength <= 0) {
                         maxLength = 1;
                     }
                     spaceIndex = maxLength;
@@ -885,17 +888,17 @@ public class TextArea extends Component {
             rowStrings.addElement(rowText);
             //adding minCharactersInRow doesn't work if what is left is less
             //then minCharactersInRow
-            to=from;//+minCharactersInRow;
+            to = from;//+minCharactersInRow;
             rowIndex++;
         }
-        if(text[text.length -1 ] == '\n'){
+        if (text[text.length - 1] == '\n') {
             rowStrings.addElement("");
         }
     }
-    
+
     /**
      * Gets the num of pixels gap between the rows
-     * 
+     *
      * @return the gap between rows in pixels
      */
     public int getRowsGap() {
@@ -904,13 +907,13 @@ public class TextArea extends Component {
 
     /**
      * The gap in pixels between rows
-     * 
+     *
      * @param rowsGap num of pixels to gap between rows
      */
     public void setRowsGap(int rowsGap) {
         this.rowsGap = rowsGap;
     }
-    
+
     /**
      * @inheritDoc
      */
@@ -918,14 +921,14 @@ public class TextArea extends Component {
         UIManager.getInstance().getLookAndFeel().drawTextArea(g, this);
         paintHint(g);
     }
-    
+
     /**
      * @inheritDoc
      */
-    protected Dimension calcPreferredSize(){
-        if(shouldShowHint()) {
+    protected Dimension calcPreferredSize() {
+        if (shouldShowHint()) {
             Label l = getHintLabelImpl();
-            if(l != null) {
+            if (l != null) {
                 Dimension d1 = UIManager.getInstance().getLookAndFeel().getTextAreaSize(this, true);
                 Dimension d2 = l.getPreferredSize();
                 return new Dimension(d1.getWidth() + d2.getWidth(), d1.getHeight() + d2.getHeight());
@@ -933,68 +936,68 @@ public class TextArea extends Component {
         }
         return UIManager.getInstance().getLookAndFeel().getTextAreaSize(this, true);
     }
-        
+
     /**
      * @inheritDoc
      */
-    protected Dimension calcScrollSize(){
+    protected Dimension calcScrollSize() {
         return UIManager.getInstance().getLookAndFeel().getTextAreaSize(this, false);
     }
-        
+
     /**
      * Add an action listener which is invoked when the text area was modified not during
      * modification. A text <b>field</b> might never fire an action event if it is edited
      * in place and the user never leaves the text field!
-     * 
+     *
      * @param a actionListener
      */
     public void addActionListener(ActionListener a) {
-        if(actionListeners == null) {
+        if (actionListeners == null) {
             actionListeners = new Vector();
         }
-        if(!actionListeners.contains(a)) {
+        if (!actionListeners.contains(a)) {
             actionListeners.addElement(a);
         }
     }
 
     /**
      * Removes an action listener
-     * 
+     *
      * @param a actionListener
      */
     public void removeActionListener(ActionListener a) {
-        if(actionListeners == null) {
+        if (actionListeners == null) {
             actionListeners = new Vector();
         }
         actionListeners.removeElement(a);
     }
-    
+
     /**
      * Notifies listeners of a change to the text area
      */
     void fireActionEvent() {
-        if(actionListeners != null) {
+        if (actionListeners != null) {
             ActionEvent evt = new ActionEvent(this);
-            for(int iter = 0 ; iter < actionListeners.size() ; iter++) {
-                ActionListener a = (ActionListener)actionListeners.elementAt(iter);
+            for (int iter = 0; iter < actionListeners.size(); iter++) {
+                ActionListener a = (ActionListener) actionListeners.elementAt(iter);
                 a.actionPerformed(evt);
             }
         }
     }
-    
+
     /**
      * @inheritDoc
      */
     void onEditComplete(String text) {
         setText(text);
-        if(getParent() != null) {
+        if (getParent() != null) {
             getParent().revalidate();
         }
     }
-    
+
     /**
      * Sets the default limit for the native text box size
-     * 
+     *
      * @param value default value for the size of the native text box
      */
     public static void setDefaultMaxSize(int value) {
@@ -1004,7 +1007,7 @@ public class TextArea extends Component {
     /**
      * Indicates that the text area should "grow" in height based on the content beyond the
      * limits indicate by the rows variable
-     * 
+     *
      * @return true if the text component should grow and false otherwise
      */
     public boolean isGrowByContent() {
@@ -1014,17 +1017,17 @@ public class TextArea extends Component {
     /**
      * Indicates that the text area should "grow" in height based on the content beyond the
      * limits indicate by the rows variable
-     * 
+     *
      * @param growByContent true if the text component should grow and false otherwise
      */
     public void setGrowByContent(boolean growByContent) {
         this.growByContent = growByContent;
     }
-    
+
     /**
      * Indicates whether a high value for default maxSize will be reduced to a lower
      * value if the underlying platform throws an exception.
-     * 
+     *
      * @param value new value for autoDegradeMaxSize
      */
     public static void setAutoDegradeMaxSize(boolean value) {
@@ -1034,7 +1037,7 @@ public class TextArea extends Component {
     /**
      * Indicates whether a high value for default maxSize will be reduced to a lower
      * value if the underlying platform throws an exception.
-     * 
+     *
      * @return value for autoDegradeMaxSize
      */
     public static boolean isAutoDegradeMaxSize() {
@@ -1042,10 +1045,10 @@ public class TextArea extends Component {
     }
 
     /**
-     * Unsupported characters is a string that contains characters that cause issues 
+     * Unsupported characters is a string that contains characters that cause issues
      * when rendering on some problematic fonts. The rendering engine can thus remove them
      * when drawing.
-     * 
+     *
      * @return unsupported characters string
      */
     public String getUnsupportedChars() {
@@ -1053,10 +1056,10 @@ public class TextArea extends Component {
     }
 
     /**
-     * Unsupported characters is a string that contains characters that cause issues 
+     * Unsupported characters is a string that contains characters that cause issues
      * when rendering on some problematic fonts. The rendering engine can thus remove them
      * when drawing.
-     * 
+     *
      * @param unsupportedChars the unsupported character string
      */
     public void setUnsupportedChars(String unsupportedChars) {
@@ -1066,7 +1069,7 @@ public class TextArea extends Component {
 
     /**
      * Indicates the number of lines to scroll with every scroll operation
-     * 
+     *
      * @return number bigger or equal to 1
      */
     public int getLinesToScroll() {
@@ -1075,7 +1078,7 @@ public class TextArea extends Component {
 
     /**
      * Indicates the number of lines to scroll with every scroll operation
-     * 
+     *
      * @param linesToScroll number bigger or equal to 1
      */
     public void setLinesToScroll(int linesToScroll) {
@@ -1089,7 +1092,7 @@ public class TextArea extends Component {
      * Indicates the widest character in the alphabet, this is useful for detecting
      * linebreaks internally. In CJK languages the widest char is different than W
      * hence this functionality is exposed to developers.
-     * 
+     *
      * @param widestC the widest character
      */
     public static void setWidestChar(char widestC) {
@@ -1101,7 +1104,7 @@ public class TextArea extends Component {
      * Indicates the widest character in the alphabet, this is useful for detecting
      * linebreaks internally. In CJK languages the widest char is different than W
      * hence this functionality is exposed to developers.
-     * 
+     *
      * @return the widest character
      */
     public static char getWidestChar() {
@@ -1122,7 +1125,7 @@ public class TextArea extends Component {
      * Indicates whether this is a single line text area, in which case "growing" won't
      * work as expected.
      *
-     * @return  true if this is a single line text area
+     * @return true if this is a single line text area
      */
     public boolean isSingleLineTextArea() {
         return singleLineTextArea;
@@ -1164,10 +1167,10 @@ public class TextArea extends Component {
      * @see #RIGHT
      * @deprecated this method is redundant and no longer used
      */
-    public int getAbsoluteAlignment(){
+    public int getAbsoluteAlignment() {
         int a = getAlignment();
-        if(isRTL()) {
-            switch(a) {
+        if (isRTL()) {
+            switch (a) {
                 case RIGHT:
                     return LEFT;
                 case LEFT:
@@ -1194,25 +1197,25 @@ public class TextArea extends Component {
     public int getCursorPosition() {
         return -1;
     }
-    
+
     /**
      * Returns the position of the cursor line position
-     * 
+     *
      * @return the cursor line position
      */
     public int getCursorY() {
         return -1;
-    }    
+    }
 
     /**
      * Returns the position of the cursor char position in the current line.
-     * 
+     *
      * @return the cursor char position in the current line
      */
     public int getCursorX() {
         return -1;
     }
-    
+
     /**
      * True is this is a qwerty device or a device that is currently in
      * qwerty mode.
@@ -1273,10 +1276,10 @@ public class TextArea extends Component {
     public static void autoDetectWidestChar(String s) {
         Font f = UIManager.getInstance().getComponentStyle("TextArea").getFont();
         int widest = 0;
-        for(int iter = 0 ; iter < s.length() ; iter++) {
+        for (int iter = 0; iter < s.length(); iter++) {
             char c = s.charAt(iter);
             int w = f.charWidth(c);
-            if(w > widest) {
+            if (w > widest) {
                 widest = w;
                 setWidestChar(c);
             }
@@ -1308,14 +1311,14 @@ public class TextArea extends Component {
     public static void setUseStringWidth(boolean aUseStringWidth) {
         useStringWidth = aUseStringWidth;
     }
-    
+
     /**
      * Sets the TextArea hint text, the hint text  is displayed on the TextArea
      * When there is no text in the TextArea
-     * 
+     *
      * @param hint the hint text to display
      */
-    public void setHint(String hint){
+    public void setHint(String hint) {
         super.setHint(hint, getHintIcon());
     }
 
@@ -1334,7 +1337,7 @@ public class TextArea extends Component {
      *
      * @param icon the icon
      */
-    public void setHintIcon(Image icon){
+    public void setHintIcon(Image icon) {
         setHint(getHint(), icon);
     }
 
@@ -1348,13 +1351,13 @@ public class TextArea extends Component {
     }
 
     /**
-     * Sets the TextArea hint text and Icon, the hint text and icon are 
+     * Sets the TextArea hint text and Icon, the hint text and icon are
      * displayed on the TextArea when there is no text in the TextArea
-     * 
+     *
      * @param hint the hint text to display
      * @param icon the hint icon to display
      */
-    public void setHint(String hint, Image icon){
+    public void setHint(String hint, Image icon) {
         super.setHint(hint, icon);
     }
 
@@ -1380,7 +1383,7 @@ public class TextArea extends Component {
      * @see #BOTTOM
      */
     public void setVerticalAlignment(int valign) {
-        if(valign != CENTER && valign != TOP && valign != BOTTOM){
+        if (valign != CENTER && valign != TOP && valign != BOTTOM) {
             throw new IllegalArgumentException("Alignment can't be set to " + valign);
         }
         this.valign = valign;
@@ -1389,13 +1392,12 @@ public class TextArea extends Component {
     /**
      * Returns the vertical alignment of the text field, this only applies to single line text field
      *
-     *
      * @return the vertical alignment of the TextField one of: CENTER, TOP, BOTTOM
      * @see #CENTER
      * @see #TOP
      * @see #BOTTOM
      */
-    public int getVerticalAlignment(){
+    public int getVerticalAlignment() {
         return valign;
     }
 }

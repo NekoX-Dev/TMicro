@@ -1,29 +1,31 @@
 package io.nekohasekai.tmicro.utils.ui;
 
+import com.sun.lwuit.Command;
 import com.sun.lwuit.Dialog;
-import com.sun.lwuit.Font;
-import com.sun.lwuit.TextArea;
-import io.nekohasekai.tmicro.utils.ThreadUtil;
+import com.sun.lwuit.events.ActionEvent;
+import com.sun.lwuit.events.ActionListener;
+import io.nekohasekai.tmicro.Theme;
 
-public class AlertDialog {
+public class AlertDialog implements ActionListener {
 
     public Dialog dialog = new Dialog();
-    public TextArea contentArea;
+    public TextView1 contentArea;
+
+    static {
+        Dialog.setDefaultDialogType(Dialog.TYPE_NONE);
+        Dialog.setDialogTitleCompatibilityMode(true);
+    }
 
     public AlertDialog(final String title, final String content) {
-        ThreadUtil.runOnUiThread(new Runnable() {
-            public void run() {
-                dialog.setDialogType(Dialog.TYPE_NONE);
-                dialog.setTitle(title);
-                dialog.addComponent(new TextArea(content) {{
-                    contentArea = this;
-                    getStyle().setFont(Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL));
-                    setFocusable(false);
-                    setEditable(false);
-                    getStyle().setBorder(null);
-                }});
-            }
-        });
+
+        Theme.applyTitleBar(dialog.getComponentForm());
+        dialog.setTitle(title);
+        dialog.addComponent(contentArea = new TextView1(content));
+        dialog.getComponentForm().getStyle().setPadding(0, 0, 0, 0);
+        dialog.getComponentForm().getStyle().setMargin(0, 0, 0, 0);
+        dialog.addCommand(new Command("", 0));
+        dialog.addCommand(new Command("Ok", 1));
+        dialog.addCommandListener(this);
     }
 
     public void setContent(final String content) {
@@ -42,15 +44,19 @@ public class AlertDialog {
     }
 
     public void show() {
-        new Thread() {
-            public void run() {
-                dialog.show();
-            }
-        }.start();
+        dialog.show();
     }
 
     public void dismiss() {
         dialog.dispose();
+    }
+
+    public void keyReleased(int keyCode) {
+        dismiss();
+    }
+
+    public void actionPerformed(ActionEvent evt) {
+        dismiss();
     }
 
 }

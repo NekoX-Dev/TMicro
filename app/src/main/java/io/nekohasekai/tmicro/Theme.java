@@ -1,6 +1,7 @@
 package io.nekohasekai.tmicro;
 
 import com.sun.lwuit.Container;
+import com.sun.lwuit.Font;
 import com.sun.lwuit.Form;
 import com.sun.lwuit.plaf.Style;
 import com.sun.lwuit.plaf.UIManager;
@@ -32,16 +33,21 @@ public class Theme {
     public static void applyTitleBar(Form form) {
         applyTitleBar(form, Locale.getCurrent().appName);
     }
-        public static void applyTitleBar(Form form, String title) {
+
+    public static void applyTitleBar(Form form, String title) {
         form.setTitle(title);
         form.getTitleStyle().setFgColor(0xffffff);
         form.getTitleStyle().setBgColor(0x448aff);
         form.getTitleStyle().setPadding(Container.LEFT, 8);
         form.getTitleStyle().setAlignment(Container.LEFT);
 
-        Style def =  UIManager.getInstance().getComponentStyle("SoftButton");
+        Style def = UIManager.getInstance().getComponentStyle("SoftButton");
         def.setBgColor(Theme.defaultTheme.primaryDark);
-        UIManager.getInstance().setComponentStyle("SoftButton",def);
+        UIManager.getInstance().setComponentStyle("SoftButton", def);
     }
+
+    public static Font fontSmall = Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
+    public static Font fontBoldSmall = Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_SMALL);
+    public static Font fontMedium = Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
 
 }

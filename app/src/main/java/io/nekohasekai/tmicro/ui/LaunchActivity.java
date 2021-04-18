@@ -3,47 +3,57 @@ package io.nekohasekai.tmicro.ui;
 import com.sun.lwuit.*;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
-import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.layouts.BoxLayout;
 import io.nekohasekai.tmicro.Locale;
 import io.nekohasekai.tmicro.TMicro;
 import io.nekohasekai.tmicro.messenger.ConnectionsManager;
 import io.nekohasekai.tmicro.tmnet.TMApi;
-import io.nekohasekai.tmicro.utils.LogUtil;
+import io.nekohasekai.tmicro.utils.FileUtil;
 import io.nekohasekai.tmicro.utils.ui.ColoredButton;
 import io.nekohasekai.tmicro.utils.ui.TextView;
 
-import javax.microedition.lcdui.Alert;
+import javax.microedition.io.Connector;
 import java.io.IOException;
 
-public class LaunchActivity extends BaseActivity {
+public class LaunchActivity extends NetActivity {
+
+    private final boolean skipIntro;
+
+    public LaunchActivity() {
+        this(false);
+    }
+
+    public LaunchActivity(boolean skipIntro) {
+        super(false);
+        this.skipIntro = skipIntro;
+    }
+
+    public NetActivity continueSelf() {
+        return new LaunchActivity(true);
+    }
 
     public void onCreate() {
         super.onCreate();
 
-        setContentForm(new SplashForm());
+        if (!skipIntro) {
+            try {
+                Connector.open("socket://localhost");
+                FileUtil.getFile("non-exists-file").close();
+            } catch (SecurityException e) {
+                TMicro.application.notifyDestroyed();
+                return;
+            } catch (Exception ignored) {
+            }
+        }
 
         if (ConnectionsManager.getInstance().accountStatus == 0) {
-            setContentForm(new IntroForm());
-        }
-
-    }
-
-    public class SplashForm extends Form {
-
-        public SplashForm() {
-            super();
-            setLayout(new BorderLayout());
-
-            try {
-                addComponent(BorderLayout.CENTER, new Label(Image.createImage("/icon.png")) {{
-                    getStyle().setAlignment(Container.CENTER);
-                }});
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (skipIntro) {
+                startConnect();
+            } else {
+                setContentForm(new IntroForm());
             }
-
         }
+
     }
 
     public class IntroForm extends Form {
@@ -78,7 +88,7 @@ public class LaunchActivity extends BaseActivity {
 
                 addComponent(new ColoredButton("Start Messaging", new ActionListener() {
                     public void actionPerformed(ActionEvent evt) {
-                        connectServer();
+                        startConnect();
                     }
                 }));
 
@@ -93,41 +103,10 @@ public class LaunchActivity extends BaseActivity {
 
     }
 
-    private void connectServer() {
-
-        if (!ConnectionsManager.getInstance().isConnected()) {
-            loadingShow("Connecting to server...");
-
-            new Thread() {
-                public void run() {
-                    try {
-                        try {
-                            ConnectionsManager.getInstance().connect();
-                            loadingStop("Connected", 500L);
-                            loadingShow("Loading...");
-                            Thread.sleep(100L);
-                            ConnectionsManager.getInstance().processUpdates();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            loadingStop(LogUtil.formatError(e), 3000L);
-                            // TODO: SetProxy
-                        }
-                    } catch (InterruptedException ignored) {
-                    }
-                }
-            }.start();
-        }
-    }
-
     public void updateAuthorizationState(TMApi.AuthorizationState state) {
-
         if (state instanceof TMApi.AuthorizationStateWaitPhoneNumber) {
             loadingCancel();
-
             performActivity(new LoginActivity());
         }
-
     }
-
-
 }

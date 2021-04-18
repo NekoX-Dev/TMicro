@@ -4,12 +4,15 @@ import com.sun.lwuit.*;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.events.FocusListener;
+import com.sun.lwuit.events.SelectionListener;
 import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.list.DefaultListCellRenderer;
 import com.sun.lwuit.plaf.Border;
 import io.nekohasekai.tmicro.TMicro;
 import io.nekohasekai.tmicro.Theme;
 import io.nekohasekai.tmicro.utils.IoUtil;
+import io.nekohasekai.tmicro.utils.LogUtil;
+import io.nekohasekai.tmicro.utils.ui.AlertDialog;
 import io.nekohasekai.tmicro.utils.ui.ColoredButton;
 import io.nekohasekai.tmicro.utils.ui.EditText;
 import io.nekohasekai.tmicro.utils.ui.TextView;
@@ -18,10 +21,15 @@ import org.bouncycastle.util.Strings;
 
 import java.io.IOException;
 
-public class LoginActivity extends BaseActivity {
+public class LoginActivity extends NetActivity {
+
+    public NetActivity continueSelf() {
+        return new LoginActivity();
+    }
 
     public void onCreate() {
         super.onCreate();
+
         setContentForm(new InputPhoneForm());
     }
 
@@ -43,6 +51,8 @@ public class LoginActivity extends BaseActivity {
             });
 
             addComponent(new Container(new BoxLayout(BoxLayout.Y_AXIS)) {
+
+                String[] items;
 
                 public ComboBox country;
                 public EditText phoneNumber;
@@ -67,6 +77,9 @@ public class LoginActivity extends BaseActivity {
                         };
 
                         {
+                            getUnselectedStyle().setPadding(Container.LEFT, 4);
+                            getSelectedStyle().setPadding(Container.LEFT, 4);
+
                             addFocusListener(new FocusListener() {
                                 public void focusGained(Component cmp) {
                                     Form form = cmp.getComponentForm();
@@ -90,7 +103,7 @@ public class LoginActivity extends BaseActivity {
                             setHintIcon(null);
                             addItem("Choose Country");
                             try {
-                                String[] items = Strings.split(IoUtil.readResUTF8("countries.txt"), '\n');
+                                items = Strings.split(IoUtil.readResUTF8("countries.txt"), '\n');
                                 items = Arrays.reverse(items);
                                 for (int i = 0; i < items.length; i++) {
                                     String[] item = Strings.split(items[i], ';');
@@ -100,6 +113,19 @@ public class LoginActivity extends BaseActivity {
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
+
+                            addSelectionListener(new SelectionListener() {
+                                public void selectionChanged(int oldSelected, int newSelected) {
+                                    if (newSelected == 0) {
+                                        phoneNumber.setHint("Phone number");
+                                    } else {
+                                        LogUtil.info("newSelected=" + (newSelected - 1) + ", items=" + items.length);
+                                        String[] item = Strings.split(items[newSelected - 1], ';');
+                                        if (item.length < 4) return;
+                                        phoneNumber.setHint(item[item.length - 1]);
+                                    }
+                                }
+                            });
 
                             ((DefaultListCellRenderer) getRenderer()).getListFocusComponent(this).getSelectedStyle().setBorder(Border.createCompoundBorder(null, null, null, Border.createLineBorder(2, Theme.getCurrent().accent)));
                         }
@@ -120,8 +146,19 @@ public class LoginActivity extends BaseActivity {
                                 phoneNumber.requestFocus();
                                 return;
                             }
+                            String[] item = Strings.split(items[country.getSelectedIndex() - 1], ';');
+                            if (item.length > 3) {
+                                int len = 0;
+                                char[] arr = item[item.length - 1].toCharArray();
+                                for (int i = 0; i < arr.length; i++) if (arr[i] != ' ') len++;
+                                if (phoneNumber.getText().length() != len) {
+                                    new AlertDialog("Error", "Incorrect phone number format: " + phoneNumber.getText()).show();
+                                    phoneNumber.requestFocus();
+                                    return;
+                                }
+                            }
                         }
-                    }, true) {{
+                    }) {{
                         getStyle().setMargin(Container.TOP, 8);
                     }});
 

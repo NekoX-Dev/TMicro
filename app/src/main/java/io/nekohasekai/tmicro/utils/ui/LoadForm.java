@@ -3,24 +3,25 @@ package io.nekohasekai.tmicro.utils.ui;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Form;
 import com.sun.lwuit.layouts.BoxLayout;
-import io.nekohasekai.tmicro.Locale;
 import io.nekohasekai.tmicro.Theme;
 import io.nekohasekai.tmicro.utils.ThreadUtil;
+import org.bouncycastle.util.Strings;
 
 public class LoadForm extends Form {
 
-    public TextView textView;
+    public TextView1 textView1;
     public String message;
     public LoadingThread thread;
     public transient boolean start;
+    public Container contentArea;
 
     public LoadForm(String text) {
         message = text;
         Theme.applyTitleBar(this);
         setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-        addComponent(new Container(new BoxLayout(BoxLayout.Y_AXIS)) {{
+        addComponent(contentArea = new Container(new BoxLayout(BoxLayout.Y_AXIS)) {{
             getStyle().setMargin(8, 8, 8, 8);
-            addComponent(textView = new TextView(message));
+            addComponent(textView1 = new TextView1(message));
         }});
 
         start();
@@ -45,7 +46,7 @@ public class LoadForm extends Form {
         cancel();
         ThreadUtil.runOnUiThread(new Runnable() {
             public void run() {
-                textView.setText(message);
+                textView1.setText(message);
             }
         });
     }
@@ -72,7 +73,11 @@ public class LoadForm extends Form {
 
         public void run() {
             while (isAlive() && start) {
-                String string = message + "    ";
+                if (getComponentForm() == null) break;
+
+                String[] lines = Strings.split(message, '\n');
+
+                String string = lines[0] + "    ";
                 if (step == 0) {
                     string += "/";
                     step = 1;
@@ -87,15 +92,18 @@ public class LoadForm extends Form {
                     step = 0;
                 }
 
-                final String finalString = string;
+                lines[0] = string;
+
+
+                final String finalString = Strings.join(lines);
                 ThreadUtil.runOnUiThread(new Runnable() {
                     public void run() {
-                        textView.setText(finalString);
+                        textView1.setText(finalString);
                     }
                 });
 
                 try {
-                    Thread.sleep(500L);
+                    Thread.sleep(300L);
                 } catch (InterruptedException ignored) {
                     return;
                 }

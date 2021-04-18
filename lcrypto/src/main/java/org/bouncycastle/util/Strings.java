@@ -255,6 +255,15 @@ public final class Strings {
         return res;
     }
 
+    public static String join(String[] strings) {
+        StringBuffer buffer = new StringBuffer();
+        for (int i = 0; i < strings.length; i++) {
+            if (i > 0) buffer.append('\n');
+            buffer.append(strings[i]);
+        }
+        return buffer.toString();
+    }
+
     public static String lineSeparator() {
         return LINE_SEPARATOR;
     }

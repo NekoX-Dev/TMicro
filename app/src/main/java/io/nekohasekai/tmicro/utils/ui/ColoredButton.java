@@ -21,12 +21,15 @@ public class ColoredButton extends Container {
             getUnselectedStyle().setFgColor(Theme.getCurrent().onSurface);
             getUnselectedStyle().setBgColor(Theme.getCurrent().accent);
             getUnselectedStyle().setBorder(null);
+            getUnselectedStyle().setFont(Theme.fontMedium);
             getSelectedStyle().setFgColor(Theme.getCurrent().onSurface);
             getSelectedStyle().setBgColor(Theme.getCurrent().accent);
             getSelectedStyle().setBorder(Border.createCompoundBorder(null, null, Border.createLineBorder(5, Theme.getCurrent().accentDark), null));
+            getSelectedStyle().setFont(Theme.fontMedium);
             getPressedStyle().setFgColor(Theme.getCurrent().onSurface);
             getPressedStyle().setBgColor(Theme.getCurrent().accentLight);
             getPressedStyle().setBorder(null);
+            getPressedStyle().setFont(Theme.fontMedium);
 
             addFocusListener(new FocusListener() {
                 public void focusGained(Component cmp) {
@@ -44,6 +47,19 @@ public class ColoredButton extends Container {
         this();
         button.setText(text);
         button.addActionListener(listener);
+    }
+
+    public void setMargin(int top, int bottom, int left, int right) {
+        getUnselectedStyle().setMargin(top, bottom, left, right);
+        getSelectedStyle().setMargin(top, bottom, left, right);
+        getPressedStyle().setMargin(top, bottom, left, right);
+
+    }
+
+    public void setPadding(int top, int bottom, int left, int right) {
+        getUnselectedStyle().setPadding(top, bottom, left, right);
+        getSelectedStyle().setPadding(top, bottom, left, right);
+        getPressedStyle().setPadding(top, bottom, left, right);
     }
 
 

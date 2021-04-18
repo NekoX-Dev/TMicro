@@ -36,6 +36,7 @@ import com.sun.lwuit.list.ListCellRenderer;
 import com.sun.lwuit.plaf.LookAndFeel;
 import com.sun.lwuit.plaf.Style;
 import com.sun.lwuit.plaf.UIManager;
+
 import java.util.Vector;
 
 /**
@@ -610,6 +611,7 @@ public class MenuBar extends Container implements ActionListener {
             b.getStyle().setPadding(0, 0, 0, 0);
         }
         b.getStyle().setFgColor(0xffffff);
+        b.getPressedStyle().setFgColor(0xc7c7c7);
     }
 
     /**

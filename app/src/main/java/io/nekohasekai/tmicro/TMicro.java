@@ -1,19 +1,14 @@
 package io.nekohasekai.tmicro;
 
-import com.sun.lwuit.Display;
-import com.sun.lwuit.plaf.DefaultLookAndFeel;
-import com.sun.lwuit.plaf.LookAndFeel;
-import com.sun.lwuit.plaf.UIManager;
+import com.sun.lwuit.*;
+import com.sun.lwuit.layouts.BorderLayout;
 import io.nekohasekai.tmicro.messenger.ConnectionsManager;
 import io.nekohasekai.tmicro.ui.BaseActivity;
 import io.nekohasekai.tmicro.ui.LaunchActivity;
-import io.nekohasekai.tmicro.utils.FileUtil;
 import io.nekohasekai.tmicro.utils.LogUtil;
 import io.nekohasekai.tmicro.utils.ResUtil;
 import j2me.util.HashMap;
-import j2me.util.LinkedList;
 
-import javax.microedition.io.Connector;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
 import java.io.IOException;
@@ -28,11 +23,6 @@ public class TMicro extends MIDlet {
     public static TMicro application;
 
     public BaseActivity contentActivity;
-    public LinkedList listeners;
-
-    public TMicro() {
-        listeners = new LinkedList();
-    }
 
     public void setContentActivity(BaseActivity activity) {
         if (contentActivity != null) {
@@ -49,21 +39,18 @@ public class TMicro extends MIDlet {
         LogUtil.info("Start app");
         if (application == null) {
             LogUtil.info("Create app");
-
             Display.init(this);
-
-            HashMap properties = ResUtil.readPropertiesRes("/config.properties");
-            SERVER = (String) properties.get("SERVER");
             application = this;
 
-            try {
-                Connector.open("socket://localhost");
-                FileUtil.getFile("non-exists-file").close();
-            } catch (SecurityException e) {
-                TMicro.application.notifyDestroyed();
-                return;
-            } catch (Exception ignored) {
-            }
+            new SplashForm().show();
+
+            new Thread() {
+                public void run() {
+                    HashMap properties = ResUtil.readPropertiesRes("/config.properties");
+                    SERVER = (String) properties.get("SERVER");
+                    ConnectionsManager.getInstance();
+                }
+            }.start();
 
             setContentActivity(new LaunchActivity());
         } else if (contentActivity != null) {
@@ -90,4 +77,22 @@ public class TMicro extends MIDlet {
             contentActivity.onDestroy(unconditional);
         }
     }
+
+    public static class SplashForm extends Form {
+
+        public SplashForm() {
+            super();
+            setLayout(new BorderLayout());
+
+            try {
+                addComponent(BorderLayout.CENTER, new Label(Image.createImage("/icon.png")) {{
+                    getStyle().setAlignment(Container.CENTER);
+                }});
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
 }

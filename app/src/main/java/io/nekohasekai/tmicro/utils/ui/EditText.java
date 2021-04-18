@@ -8,6 +8,7 @@ import com.sun.lwuit.events.FocusListener;
 public class EditText extends TextField implements ActionListener {
 
     public Command backSpace = new Command("Back", 10);
+    public Command input = new Command("Input", 11);
 
     public EditText() {
         super();
@@ -35,6 +36,9 @@ public class EditText extends TextField implements ActionListener {
                 MenuBar menu = form.getMenuBar();
                 if (menu == null) return;
                 menu.addCommand(backSpace);
+                if (getConstraint() == TextArea.ANY) {
+                    menu.addCommand(input);
+                }
                 form.addCommandListener(EditText.this);
             }
 
@@ -44,15 +48,35 @@ public class EditText extends TextField implements ActionListener {
                 MenuBar menu = form.getMenuBar();
                 if (menu == null) return;
                 menu.removeCommand(backSpace);
+                if (getConstraint() == TextArea.ANY) {
+                    menu.removeCommand(input);
+                }
                 form.removeCommandListener(EditText.this);
             }
         });
     }
 
-
     public void actionPerformed(final ActionEvent evt) {
-        if (evt.getCommand().getId() == backSpace.getId()) {
-            deleteChar();
+        switch (evt.getCommand().getId()) {
+            case 10: {
+                deleteChar();
+            }
+            break;
+            case 11: {
+                evt.consume();
+                editString();
+            }
         }
     }
+
+    public void setMargin(int top, int bottom, int left, int right) {
+        getUnselectedStyle().setMargin(top, bottom, left, right);
+        getSelectedStyle().setMargin(top, bottom, left, right);
+    }
+
+    public void setPadding(int top, int bottom, int left, int right) {
+        getUnselectedStyle().setPadding(top, bottom, left, right);
+        getSelectedStyle().setPadding(top, bottom, left, right);
+    }
+
 }

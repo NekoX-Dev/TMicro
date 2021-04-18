@@ -48,6 +48,7 @@ public class ConnectionsManager extends WebSocketListener {
     public String proxy;
     public byte[] accountSession;
     public int accountStatus;
+    public String relayAddress;
 
     private ECPrivateKeyParameters accountPk;
 
@@ -76,6 +77,7 @@ public class ConnectionsManager extends WebSocketListener {
         } catch (IOException ignored) {
             proxy = "";
             accountSession = EncUtil.generateSM2PrivateKey().getD().toByteArray();
+            relayAddress = "";
             writeConfig();
             return;
         }
@@ -87,21 +89,40 @@ public class ConnectionsManager extends WebSocketListener {
         proxy = input.readString(true);
         accountSession = input.readByteArray(true);
         accountStatus = input.readInt32(true);
+        relayAddress = input.readString(true);
         input.cleanup();
     }
 
-    private void writeConfig() throws IOException {
+    public void writeConfig() throws IOException {
         SerializedData output = db.getOut(1);
         output.writeInt32(1);
         output.writeString(proxy);
         output.writeByteArray(accountSession);
         output.writeInt32(accountStatus);
+        output.writeString(relayAddress);
         output.flush();
+        output.cleanup();
     }
 
     public WebSocket socket;
     public EncUtil.ChaChaSession chaChaSession;
     public int status;
+    private final LinkedList listeners = new LinkedList();
+
+    public void addListener(TMListener listener) {
+        listeners.add(listener);
+        if (!sendEvent) {
+            sendEvent = true;
+            processUpdates();
+        }
+    }
+
+    public void removeListener(TMListener listener) {
+        listeners.remove(listener);
+        if (listeners.isEmpty()) {
+            sendEvent = false;
+        }
+    }
 
     public void connect() throws IOException {
         if (socket != null && socket.isActive()) {
@@ -120,7 +141,26 @@ public class ConnectionsManager extends WebSocketListener {
         String authorization = Base64.toBase64String(EncUtil.publicEncode(data.toByteArray()));
         headers.put("Authorization", "Basic " + authorization);
 
-        socket = WebSocketClient.open(TMicro.SERVER, "/", headers, this);
+        String address = TMicro.SERVER;
+        if (relayAddress.length() > 0) {
+            address = relayAddress;
+            int portIndex = address.lastIndexOf(':');
+            if (portIndex != -1) {
+                String port = address.substring(portIndex + 1);
+                try {
+                    Integer.parseInt(port);
+                } catch (NumberFormatException invalidNumber) {
+                    throw new IOException("Invalid port number: " + port);
+                }
+            }
+        }
+
+        try {
+            socket = WebSocketClient.open(relayAddress.length() > 0 ? relayAddress : TMicro.SERVER, "/", headers, this);
+        } catch (IllegalArgumentException invalidLink) {
+            invalidLink.printStackTrace();
+            throw new IOException(invalidLink.getMessage());
+        }
         TMApi.InitConnection request = new TMApi.InitConnection();
         request.layer = TMApi.LAYER;
         request.appVersion = TMicro.VERSION_INT;
@@ -143,7 +183,7 @@ public class ConnectionsManager extends WebSocketListener {
                     tmContinue(EncUtil.processSM2(accountPk, false, temp.data));
                 } catch (IOException e) {
                     LogUtil.error(e, "Verify connection failed");
-                    TMicro.application.contentActivity.onDisconnected("Verify connection failed");
+                    TMicro.application.contentActivity.onDisconnected(400);
                     disconnect();
                 }
             }
@@ -197,8 +237,23 @@ public class ConnectionsManager extends WebSocketListener {
         }
     }
 
+    protected void onOpen(WebSocket socket) {
+        if (!sendEvent) {
+            updates.add(new Integer(0));
+            return;
+        }
+        Iterator iter = listeners.iterator();
+        while (iter.hasNext()) ((TMListener) iter.next()).onConnected();
+    }
+
     protected void onClose(WebSocket socket, int code, String reason) {
         System.out.println("Connection closed, code=" + code + ", reason=" + reason);
+        if (!sendEvent) {
+            updates.add(new OnDisconnected(code));
+            return;
+        }
+        Iterator iter = listeners.iterator();
+        while (iter.hasNext()) ((TMListener) iter.next()).onDisconnected(code);
     }
 
     protected void onFailure(WebSocket socket, Throwable t) {
@@ -229,7 +284,7 @@ public class ConnectionsManager extends WebSocketListener {
     private volatile int requestId = 0;
     private final HashMap callbacks = new HashMap();
 
-    private void sendRequest(TMApi.Function request, TMCallback callback) throws IOException {
+    public void sendRequest(TMApi.Function request, TMCallback callback) throws IOException {
         if (TMicro.DEBUG) {
             LogUtil.info("Java send " + LogUtil.getClassName(request));
         }
@@ -277,7 +332,7 @@ public class ConnectionsManager extends WebSocketListener {
         }
     }
 
-    private transient boolean sendEvent;
+    private transient boolean sendEvent = true;
     private final LinkedList updates = new LinkedList();
 
     private void processUpdate(TMApi.Update object) {
@@ -285,18 +340,48 @@ public class ConnectionsManager extends WebSocketListener {
             updates.add(object);
         } else if (object instanceof TMApi.UpdateAuthorizationState) {
             TMApi.UpdateAuthorizationState update = (TMApi.UpdateAuthorizationState) object;
-            Iterator iter = TMicro.application.listeners.iterator();
-            while (iter.hasNext()) ((TMListener) iter.next())
-                    .updateAuthorizationState(update.state);
+            Iterator iter = listeners.iterator();
+            while (iter.hasNext()) ((TMListener) iter.next()).updateAuthorizationState(update.state);
         }
     }
 
-    public void processUpdates() {
+    private static class OnDisconnected {
+        int code;
+
+        public OnDisconnected(int code) {
+            this.code = code;
+        }
+    }
+
+    private void processUpdates() {
         sendEvent = true;
         Iterator iter = updates.iterator();
         while (iter.hasNext()) {
-            processUpdate((TMApi.Update) iter.next());
+            Object obj = iter.next();
+            if (obj instanceof TMApi.Update) {
+                processUpdate((TMApi.Update) obj);
+            } else if (obj instanceof OnDisconnected) {
+                Iterator iter1 = listeners.iterator();
+                while (iter1.hasNext()) ((TMListener) iter1.next()).onDisconnected(((OnDisconnected) obj).code);
+            } else if (obj instanceof Integer) {
+                Iterator iter1 = listeners.iterator();
+                switch (((Integer) obj).intValue()) {
+                    case 0: {
+                        while (iter1.hasNext()) ((TMListener) iter1.next()).onConnected();
+                    }
+                    break;
+                }
+            }
         }
+    }
+
+    public void pause() {
+        sendEvent = false;
+    }
+
+    public void resume() {
+        sendEvent = true;
+        processUpdates();
     }
 
 }

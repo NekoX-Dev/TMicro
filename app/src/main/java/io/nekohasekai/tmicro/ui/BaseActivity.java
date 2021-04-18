@@ -8,6 +8,10 @@ import io.nekohasekai.tmicro.utils.ui.LoadForm;
 
 public class BaseActivity extends TMListener {
 
+    public BaseActivity() {
+        super(0);
+    }
+
     public Form contentForm;
     public LoadForm loadingForm;
 
@@ -17,11 +21,9 @@ public class BaseActivity extends TMListener {
     }
 
     public void onCreate() {
-        TMicro.application.listeners.add(this);
     }
 
     public void onStop() {
-        TMicro.application.listeners.remove(this);
     }
 
     public void onPause() {
@@ -42,9 +44,30 @@ public class BaseActivity extends TMListener {
             loadingUpdate(message);
             return;
         }
-        loadingForm = new LoadForm(message);
+        loadingShow(new LoadForm(message));
+    }
+
+    public void loadingStatic(String message) {
+        if (loadingForm != null) {
+            LogUtil.warn("Loading form already exists!");
+            loadingUpdate(message);
+            if (loadingForm.start) {
+                loadingForm.stop();
+            }
+            return;
+        }
+        loadingStatic(new LoadForm(message));
+    }
+
+    public void loadingShow(LoadForm form) {
+        loadingForm = form;
         loadingForm.show();
         loadingForm.start();
+    }
+
+    public void loadingStatic(LoadForm form) {
+        loadingForm = form;
+        loadingForm.show();
     }
 
     public void loadingUpdate(String message) {
@@ -80,12 +103,6 @@ public class BaseActivity extends TMListener {
         Thread.sleep(delay);
         contentForm.showBack();
         loadingForm = null;
-    }
-
-    public void onConnected() {
-    }
-
-    public void onDisconnected(String error) {
     }
 
     public void performActivity(BaseActivity activity) {
